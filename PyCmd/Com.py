@@ -34,28 +34,14 @@ class cCom(object):
         self.com_name = path + rq + 'com.txt';
 
         #读取配置参数
-        self.sComGetCfg();
-        
-    def sComGetCfg(self):
-        import os.path
-        import configparser
-        self.filepath = os.path.dirname(os.getcwd()) + '/bin/' + "config.ini";
-        self.config   = configparser.ConfigParser();
-        self.config.read(self.filepath);
-        if(self.config.has_section('Com') == False):#如果不存下载默认值
-            self.config.add_section('Com'); #Add Section
-            self.config.set('Com', 'PrfClass',  '0');
-            self.config.set('Com', 'SerialNum', '1');
-            self.config.write(open(self.filepath, 'w'));
-
-        # 读取配置文件参数值
-        self.PrfClass  = int(self.config['Com']['PrfClass']);
-        self.ComNum    = int(self.config['Com']['SerialNum']);
+        from Config import GetConfig,SetConfig;
+        self.SetConfig = SetConfig;
+        self.PrfClass  = int(GetConfig('Com', 'PrfClass',  '0'));
+        self.ComNum    = int(GetConfig('Com', 'SerialNum', '1'));
         
     def sComSetCfg(self):
-        self.config.set('Com', 'PrfClass',  str(self.PrfClass));
-        self.config.set('Com', 'SerialNum', str(self.ComNum));
-        self.config.write(open(self.filepath, 'w'));
+        self.SetConfig('Com', 'PrfClass',  str(self.PrfClass));
+        self.SetConfig('Com', 'SerialNum', str(self.ComNum));
         
     def ComMsg(self):
         print("LastEdit:2018/11/20");

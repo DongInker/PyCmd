@@ -1,6 +1,6 @@
 
 class cAutoTxd(object):
-    def __init__(self,prf=0):
+    def __init__(self):
     
         from Ufd import UfdTxd;
 
@@ -12,28 +12,14 @@ class cAutoTxd(object):
         self.TxdCmd    = 'help';
         
         #读取配置参数
-        self.sAutoTxdGetCfg();
-        
-    def sAutoTxdGetCfg(self):
-        import os.path
-        import configparser
-        self.filepath = os.path.dirname(os.getcwd()) + '/bin/' + "config.ini";
-        self.config   = configparser.ConfigParser();
-        self.config.read(self.filepath);
-        if(self.config.has_section('AutoTxd') == False):#如果不存下载默认值
-            self.config.add_section('AutoTxd'); #Add Section
-            self.config.set('AutoTxd', 'PrfClass',   '0');
-            self.config.set('AutoTxd', 'AutoTxdTim', '100');
-            self.config.write(open(self.filepath, 'w'));
-
-        # 读取配置文件参数值
-        self.PrfClass  = int(self.config['AutoTxd']['PrfClass']);
-        self.Time10mS  = int(self.config['AutoTxd']['AutoTxdTim']);
+        from Config import GetConfig,SetConfig;
+        self.SetConfig = SetConfig;
+        self.PrfClass = int(GetConfig('AutoTxd', 'PrfClass',   '0'));
+        self.Time10mS = int(GetConfig('AutoTxd', 'AutoTxdTim', '100'));
         
     def sAutoTxdSetCfg(self):
-        self.config.set('AutoTxd', 'PrfClass',   str(self.PrfClass));
-        self.config.set('AutoTxd', 'AutoTxdTim', str(self.Time10mS));
-        self.config.write(open(self.filepath, 'w'));        
+        self.SetConfig('AutoTxd', 'PrfClass',   str(self.PrfClass));
+        self.SetConfig('AutoTxd', 'AutoTxdTim', str(self.Time10mS));      
         
     def sAutoTxdMsg(self):
         print("PrfClass   :%d"%(self.PrfClass));
@@ -116,7 +102,7 @@ class cAutoTxd(object):
         return False;
 
 # 实例化类
-AutoTxd = cAutoTxd(prf=0);
+AutoTxd = cAutoTxd();
 # 外调接口
 def AutoTxdCmd(incmd):
     return AutoTxd.sAutoTxdCmd(incmd);

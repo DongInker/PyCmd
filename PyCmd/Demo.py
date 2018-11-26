@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+
+
 class cDemo(object):
     def __init__(self):
     
@@ -11,25 +13,12 @@ class cDemo(object):
         self.PrjBCnt10mS = 0;
 
         #读取配置参数
-        self.sDemoGetCfg();
-        
-    def sDemoGetCfg(self):
-        #配置文件
-        import os.path
-        import configparser
-        self.filepath = os.path.dirname(os.getcwd()) + '/bin/' + "config.ini";
-        self.config   = configparser.ConfigParser();
-        self.config.read(self.filepath);
-        if(self.config.has_section('Demo') == False):#如果不存下载默认值
-            self.config.add_section('Demo'); #Add Section
-            self.config.set('Demo', 'PrfClass', '0');
-            self.config.write(open(self.filepath, 'w'));
-            
-        self.PrfClass  = int(self.config['Demo']['PrfClass']);
-        
+        from Config import GetConfig,SetConfig;
+        self.SetConfig = SetConfig;
+        self.PrfClass = int(GetConfig('Demo', 'PrfClass', '0'));
+
     def sDemoSetCfg(self):
-        self.config.set('Demo', 'PrfClass', str(self.PrfClass));
-        self.config.write(open(self.filepath, 'w'));
+        self.SetConfig('Demo', 'PrfClass', str(self.PrfClass));
         
     def sDemoMsg(self):
         print("LastEdit:2018/11/05");

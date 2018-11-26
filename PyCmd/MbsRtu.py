@@ -54,7 +54,7 @@ def calculate_crc(data):
 from format    import isFloatType,isUintType;
 
 class cMbsRtu(object):
-    def __init__(self,prf=0):
+    def __init__(self):
         # 调用外部包 模块
         from Com import ComSendHex,ComRxdMode,isComRxdMode,ComRxdBuf;
 
@@ -64,15 +64,24 @@ class cMbsRtu(object):
         self.isRxdModeFunc = isComRxdMode;
         self.RxdBufFunc    = ComRxdBuf;
         
-        self.PrfClass  = prf;
-        self.SlaveID   = 1;
-        self.AckWaitmS = 50;
         self.AckCnt    = 0;
 
         #创建串口通信记录文件路径
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         path = os.path.dirname(os.getcwd()) + '/Logs/';
         self.mbs_name = path + rq + 'mbs.txt';
+
+        #读取配置参数
+        from Config import GetConfig,SetConfig;
+        self.SetConfig = SetConfig;
+        self.PrfClass  = int(GetConfig('MbsRtu', 'PrfClass',   '0'));
+        self.SlaveID   = int(GetConfig('MbsRtu', 'SlaveID',    '1'));
+        self.AckWaitmS = int(GetConfig('MbsRtu', 'AckWait10mS','50'));
+
+    def sMbsRtuSetCfg(self):
+        self.SetConfig('MbsRtu', 'PrfClass', str(self.PrfClass));
+        self.SetConfig('MbsRtu', 'PrfClass', str(self.SlaveID));
+        self.SetConfig('MbsRtu', 'PrfClass', str(self.AckWaitmS));
         
     def MbsRtuMsg(self):
         print("LastEdit:2018/11/08");
@@ -82,12 +91,15 @@ class cMbsRtu(object):
         
     def MbsRtuPrf(self,PrfClass):
         self.PrfClass = PrfClass;
-
+        self.sMbsRtuSetCfg();
+        
     def MbsSlaveID(self,id):
         self.SlaveID = id;
-
+        self.sMbsRtuSetCfg();
+        
     def sMbsAckWaitmS(self,ackwait):
         self.AckWaitmS = ackwait;
+        self.sMbsRtuSetCfg();
         
     def MbsSend(self,data):
         crc = struct.pack("<H",calculate_crc(data))# <:little-endian
@@ -235,7 +247,7 @@ class cMbsRtu(object):
         return False;
 
 # 实例化类
-MbsRtu = cMbsRtu(prf=0);
+MbsRtu = cMbsRtu();
 # 外调接口
 def MbsRtuCmd(incmd):
     return MbsRtu.sMbsRtuCmd(incmd);

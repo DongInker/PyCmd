@@ -28,28 +28,14 @@ class cPlotWave(object):
         self.wave_name = path + rq + 'wave.txt';
 
         #读取配置参数
-        self.sPlotWaveGetCfg();
-        
-    def sPlotWaveGetCfg(self):
-        #配置文件
-        import os.path
-        import configparser
-        self.filepath = os.path.dirname(os.getcwd()) + '/bin/' + "config.ini";
-        self.config   = configparser.ConfigParser();
-        self.config.read(self.filepath);
-        if(self.config.has_section('PlotWave') == False):#如果不存下载默认值
-            self.config.add_section('PlotWave'); #Add Section
-            self.config.set('PlotWave','PrfClass', '0');
-            self.config.set('PlotWave','RxdWaveEn','0');
-            self.config.write(open(self.filepath, 'w'));
-            
-        self.PrfClass   = int(self.config['PlotWave']['PrfClass']);
-        self.RxdWaveEn  = int(self.config['PlotWave']['RxdWaveEn']);
-        
+        from Config import GetConfig,SetConfig;
+        self.SetConfig = SetConfig;
+        self.PrfClass  = int(GetConfig('PlotWave', 'PrfClass', '0'));
+        self.RxdWaveEn = int(GetConfig('PlotWave', 'RxdWaveEn', '0'));
+
     def sPlotWaveSetCfg(self):
-        self.config.set('PlotWave', 'PrfClass', str(self.PrfClass));
-        self.config.set('PlotWave', 'RxdWaveEn', str(self.RxdWaveEn));
-        self.config.write(open(self.filepath, 'w'));
+        self.SetConfig('PlotWave', 'PrfClass', str(self.PrfClass));
+        self.SetConfig('PlotWave', 'RxdWaveEn',str(self.RxdWaveEn));
         
     def sPlotWaveMsg(self):
         print("LastEdit :2018/11/05");

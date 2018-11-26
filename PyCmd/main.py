@@ -168,6 +168,7 @@ def PrjB_10mS_Key():
 # end Key In Cmd
 ##########################################################
 #调用模块函数
+from Config    import ConfigCmd;
 from Log       import LogCmd,Log;
 from Demo      import DemoCmd,PrjF_10mS_Demo,PrjB_10mS_Demo;
 from AutoTxd   import AutoTxdCmd,SetAutoTxdEn,PrjB_10mS_AutoTxd;
@@ -180,6 +181,7 @@ from PlotWave  import PlotWaveCmd,PrjF_10mS_Plot;
 #命令行执行函数
 Cmd_FuncLst = [
 SysCmd,
+ConfigCmd,
 LogCmd,
 DemoCmd,
 AutoTxdCmd,
