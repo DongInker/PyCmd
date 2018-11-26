@@ -106,7 +106,7 @@ class cAutoTxd(object):
 
         # …Ë÷√◊‘∂Ø√¸¡Ó
         if(cmdlist[0] == 'autotxdcmd'):
-            if(cmdlist[1]):
+            if(len(cmdlist) == 2):
                 self.sSetAutoTxdEn(1);
                 self.sSetAtuoTxdCmd(incmd[len(cmdlist[0])+1:]);
                 print('AutoCmd <= {0}'.format(incmd[len(cmdlist[0])+1:]));

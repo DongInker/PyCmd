@@ -5,36 +5,63 @@ import time
 from pylab import plot,ion,subplot,figure,grid,pause,show,close,clf
 from pylab import title,xlabel,ylabel,xlim,ylim,legend
 from format    import isFloatType;
+from Log import Log;
 
 class cPlotWave(object):
-    def __init__(self,prf=0):
+    def __init__(self):
     
         # 调用外部包 模块
 
         # 连接
-        self.PrfClass   = prf;
         self.Cnt10mS    = 0;
         self.WaveBuf    = [];
         self.WaveBufCnt = 0;
         self.StrS       = '(';
         self.StrE       = ')';
 
+        self.FigureBF   = 0;
         self.CloseWave  = 0;
-
+        
         #创建串口通信记录文件路径
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         path = os.path.dirname(os.getcwd()) + '/Logs/';
         self.wave_name = path + rq + 'wave.txt';
+
+        #读取配置参数
+        self.sPlotWaveGetCfg();
+        
+    def sPlotWaveGetCfg(self):
+        #配置文件
+        import os.path
+        import configparser
+        self.filepath = os.path.dirname(os.getcwd()) + '/bin/' + "config.ini";
+        self.config   = configparser.ConfigParser();
+        self.config.read(self.filepath);
+        if(self.config.has_section('PlotWave') == False):#如果不存下载默认值
+            self.config.add_section('PlotWave'); #Add Section
+            self.config.set('PlotWave','PrfClass', '0');
+            self.config.set('PlotWave','RxdWaveEn','0');
+            self.config.write(open(self.filepath, 'w'));
+            
+        self.PrfClass   = int(self.config['PlotWave']['PrfClass']);
+        self.RxdWaveEn  = int(self.config['PlotWave']['RxdWaveEn']);
+        
+    def sPlotWaveSetCfg(self):
+        self.config.set('PlotWave', 'PrfClass', str(self.PrfClass));
+        self.config.set('PlotWave', 'RxdWaveEn', str(self.RxdWaveEn));
+        self.config.write(open(self.filepath, 'w'));
         
     def sPlotWaveMsg(self):
-        print("LastEdit:2018/11/05");
-        print("PrfClass:%d"%(self.PrfClass));
-        print("Cnt10mS :%d"%(self.Cnt10mS));
+        print("LastEdit :2018/11/05");
+        print("PrfClass :%d"%(self.PrfClass));
+        print("Cnt10mS  :%d"%(self.Cnt10mS));
+        print("RxdWaveEn:%d"%(self.RxdWaveEn));
         print("%sfloat%s"%(self.StrS,self.StrE));
         
     def sPlotWavePrf(self,PrfClass):
         self.PrfClass = PrfClass;
-
+        self.sPlotWaveSetCfg();
+        
     def sSetStrS(self,start):
         self.StrS = start;
 
@@ -42,13 +69,22 @@ class cPlotWave(object):
         self.StrE = end;
         
     def sPlotWaveClose(self):
-        #close();#关闭窗口 main进程不能关闭 其他线程串口 必须通知相同进程进行关闭
-        self.CloseWave  = 1;
+        if(self.FigureBF):
+            self.CloseWave = 1;
+        else:
+            close();#关闭窗口 main进程不能关闭 其他线程串口 必须通知相同进程进行关闭
+            self.WaveBuf    = [];
+            self.WaveBufCnt = 0;
 
+    def sRxdWaveEn(self,en):
+        self.RxdWaveEn = en;
+        self.sPlotWaveSetCfg();
+        
     def sSetBufData(self,buf):
-        return 0;
+        if(self.RxdWaveEn  == 0):
+            return 0;
+            
         import re
-
         buf = re.sub('\r\n', '',buf);# 删除字符串中 \r\n
         
         '''
@@ -63,6 +99,7 @@ class cPlotWave(object):
         match = pattern.match(buf);
         if match:
             cmdbuf = match.group(1);
+            self.FigureBF = 1;
             self.sPlotWaveAdd(float(cmdbuf));
             
     def sPlotWaveAdd(self,val):
@@ -108,6 +145,7 @@ class cPlotWave(object):
             print("  PlotWavePrf .. -W PlotWave Printf Class <0,1>");
             print("  PlotAdd     .. -W Add Wave Data <float>");
             print("  PlotClose   .. -W Close Plot");
+            print("  RxdWaveEn   .. -W Rxd Ploat Wave En <0,1>");
             print("  PlotStrS    .. -W Plot Data Start Str");
             print("  PlotStrE    .. -W Plot Data End   Str");
             return True;
@@ -128,6 +166,7 @@ class cPlotWave(object):
         if(cmdlist[0] == 'plotadd'):
             if(len(cmdlist) == 2):
                 if(isFloatType(cmdlist[1]) == True):
+                    self.FigureBF = 0;
                     self.sPlotWaveAdd(float(cmdlist[1]));
                     return True;
             return False;  
@@ -135,7 +174,16 @@ class cPlotWave(object):
         if(cmdlist[0] == 'plotclose'):
             self.sPlotWaveClose();
             return True;
-
+            
+        if(cmdlist[0] == 'rxdwaveen'):
+            if(len(cmdlist) == 2):
+                if(cmdlist[1].isdigit() == False):#不是数字直接结束
+                    return False;
+                self.sRxdWaveEn(int(cmdlist[1]));
+                print('PlotRxdWaveEn <= {0}'.format(cmdlist[1]));
+                return True;
+            return False;
+            
         if(cmdlist[0] == 'plotstrs'):
             if(len(cmdlist) == 2):
                 self.sSetStrS(cmdlist[1]);
@@ -151,7 +199,7 @@ class cPlotWave(object):
         return False;
 
 # 实例化类
-PlotWave = cPlotWave(prf=0);
+PlotWave = cPlotWave();
 # 外调接口
 def PlotWaveCmd(incmd):
     return PlotWave.sPlotWaveCmd(incmd);
