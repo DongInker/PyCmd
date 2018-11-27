@@ -1,9 +1,17 @@
 
+# -*- coding: utf-8 -*-
+
 import logging  # 引入logging模块
-import os.path
+import os
 import time
 
-# -*- coding: utf-8 -*-
+def ClearNullFile(path):
+    files = os.listdir(path);  # 获取路径下的子文件(夹)列表    
+    for file in files: 
+        if os.path.isfile(path+file):  # 如果是文件 
+            if os.path.getsize(path+file) == 0:  # 文件大小为0     
+                os.remove(path+file)  # 删除这个文件    
+
 class cLog(object):
     def __init__(self,prf=0):
     
@@ -17,7 +25,15 @@ class cLog(object):
         self.logger.setLevel(logging.INFO)  # Log等级总开关
         # 第二步，创建一个handler，用于写入日志文件
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
-        log_path = os.path.dirname(os.getcwd()) + '/Logs/'
+        log_path = os.path.dirname(os.getcwd()) + '/Logs/';
+
+        # 判断logs文件夹是否存在，不存在则创建
+        if not os.path.exists(log_path):
+            os.makedirs(log_path);
+            
+        # 清除空日志文件
+        ClearNullFile(log_path);
+        
         log_name = log_path + rq + '.log'
         logfile = log_name
         fh = logging.FileHandler(logfile, mode='w')
@@ -32,6 +48,8 @@ class cLog(object):
         self.Console = 0;
         self.Level   = 0;
         self.sLogLevel(self.Level);
+
+        
         
     def sLogMsg(self):
         print("LastEdit:2018/11/08");
@@ -68,6 +86,7 @@ class cLog(object):
     def sLogCmd(self,incmd):
         # 空格进行切割
         cmdlist = incmd.split();
+        cmdlist[0]  = cmdlist[0].lower();#命令字符串 转换小写
         
         if(cmdlist[0] == 'help'):
             print('  .Log');

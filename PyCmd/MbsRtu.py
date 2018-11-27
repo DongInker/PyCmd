@@ -159,6 +159,7 @@ class cMbsRtu(object):
     def sMbsRtuCmd(self,incmd):
         # ¿Õ¸ñ½øÐÐÇÐ¸î
         cmdlist = incmd.split();
+        cmdlist[0]  = cmdlist[0].lower();#ÃüÁî×Ö·û´® ×ª»»Ð¡Ð´
         
         if(cmdlist[0] == 'help'):
             print('  .MbsRtu');
@@ -172,7 +173,7 @@ class cMbsRtu(object):
             print("  MbsAckWait  .. -W Ack Over Time 10mS <1~5000>");
             print("  Mbs03       .. -W Modbus Func 0X03 <addr,num>");
             print("  Mbs06       .. -W Modbus Func 0X06 <addr,val>");
-            print("  Mbsf        .. -W Modbus float <addr,val>");
+            print("  Mbsf        .. -W Modbus float <addr> [val]");
             return True;
 
         if(cmdlist[0] == 'mbsrtumsg'):

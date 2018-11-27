@@ -209,6 +209,7 @@ class cUfd(object):
     def sUfdCmd(self,incmd):
         # 空格进行切割
         cmdlist = incmd.split();
+        cmdlist[0]  = cmdlist[0].lower();#命令字符串 转换小写
         
         if(cmdlist[0] == 'help'):
             print('  .Ufd');

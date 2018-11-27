@@ -68,7 +68,7 @@ class cKeyCmd(object):
     def Version(self):
         print('Version :1.01');
         print('Auther  :Inker.Dong');
-        print('Time    :2018/11/08');
+        print('Time    :2018/11/27');
 
     def ClearDis(self):
         import os
@@ -123,11 +123,12 @@ class cKeyCmd(object):
                 UfdTxd(KeyVal,0);#将输入字符直接发送到UFD串口
             else:
                 print(KeyVal,end='');
-            sys.stdout.flush();#强制打印缓存数据
             if(KeyVal == '\b'):# 输入 BackSpace 删除最后一个字符
                 self.RxdBuf = self.RxdBuf[:-1];
+                sys.stdout.write(' \b');# 删除显示最后一个字符
             else:
                 self.RxdBuf += KeyVal;
+            sys.stdout.flush();#强制打印缓存数据    
             return 0;
 
         # Ufd Mode
@@ -149,8 +150,8 @@ class cKeyCmd(object):
 
             #回车跳过直接重复执行上次命令
             if(len(self.RxdBuf)):
-                self.InCmd  = self.RxdBuf.lower()#将字符统一转换为小写
-                
+                self.InCmd  = self.RxdBuf;
+
             if(SysHelp(self.InCmd) == False):
                 print("unknown Cmd");
             System.PrfSysTime();
@@ -215,6 +216,7 @@ def SysHelp(InCmd):
         if(CmdFunc(InCmd) == True):
            return True;
 
+    InCmd = InCmd.lower();#统一转换小写
     if(InCmd == 'help'):
         return True;
     return False;
@@ -237,7 +239,7 @@ if __name__ == '__main__':
                 PrjB10mS();
         else:
             if(inkey != ''):
-                key = inkey.lower()#将字符统一转换为小写
+                key = inkey;
             if(SysHelp(key) == False):
                 print("unknown Cmd");
             System.PrfSysTime();

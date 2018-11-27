@@ -53,6 +53,7 @@ class cAutoTxd(object):
     def sAutoTxdCmd(self,incmd):
         # ¿Õ¸ñ½øÐÐÇÐ¸î
         cmdlist = incmd.split();
+        cmdlist[0]  = cmdlist[0].lower();#ÃüÁî×Ö·û´® ×ª»»Ð¡Ð´
         
         if(cmdlist[0] == 'help'):
             print('  .AutoTxd');
@@ -92,7 +93,7 @@ class cAutoTxd(object):
 
         # ÉèÖÃ×Ô¶¯ÃüÁî
         if(cmdlist[0] == 'autotxdcmd'):
-            if(len(cmdlist) == 2):
+            if(len(cmdlist) >= 2):
                 self.sSetAutoTxdEn(1);
                 self.sSetAtuoTxdCmd(incmd[len(cmdlist[0])+1:]);
                 print('AutoCmd <= {0}'.format(incmd[len(cmdlist[0])+1:]));
