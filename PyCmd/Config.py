@@ -72,7 +72,7 @@ class cConfig(object):
                 return True;
             if(len(cmdlist) == 2):
                 if(self.config.has_section(cmdlist[1]) == False):# ²»´æÔÚ
-                    return True;
+                    return False;
                 print(self.config.options(cmdlist[1]));
                 return True;
             if(len(cmdlist) == 3):
