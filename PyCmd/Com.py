@@ -30,9 +30,11 @@ class cCom(object):
 
         #创建串口通信记录文件路径
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
-        path = os.path.dirname(os.getcwd()) + '/Logs/';
+        path = os.path.dirname(os.getcwd()) + '\\Logs\\';
         self.com_name = path + rq + 'com.txt';
-
+        f=open(self.com_name,'a');
+        f.close();
+            
         #读取配置参数
         from Config import GetConfig,SetConfig;
         self.SetConfig = SetConfig;
@@ -191,36 +193,10 @@ class cCom(object):
             f=open(self.com_name,'a');
             f.write(rxdstr);
             f.close();
-
-            from PlotWave  import SetBufData;
-            SetBufData(rxdstr);
             
-        '''
- 
-        if(self.RxdHalfFlag == 1):
-            self.RxdHalfFlag = 0;
-            rxd = self.RxdHalfBuf + rxdbuf.value;
-        else:    
-            rxd = rxdbuf.value;
-            
-        try:
-            rxdstr = rxd.decode('gb18030');
-            sys.stdout.write(rxdstr);
-            sys.stdout.flush();
-            
-            #写入 XXXXcom.txt 文件
-            f=open(self.com_name,'a');
-            f.write(rxdstr);
-            f.close();
-            
-        except Exception as e:
-            Log.logger.error(e);
-            self.RxdHalfBuf  = rxdbuf.value;
-            self.RxdHalfFlag = 1;
-            
-        #finally:
-        #    print("finally...")
-        '''
+    def sComSaveFile(self):
+        return self.com_name;
+        
     def sComCmd(self,incmd):
         # 空格进行切割
         cmdlist = incmd.split();
@@ -336,7 +312,7 @@ def ComYmodemTx():
     if(fpos==''):#取消选择文件 直接结束下载
         return ;
 
-    ComSend('');      # 回车
+    ComSend('inker'); # 回车
     time.sleep(0.5);
     ComSend('inker'); # 登录口令
     time.sleep(0.5);
@@ -374,6 +350,9 @@ def isComRxdMode():
 def ComRxdBuf():
     return Com.sGetRxdBuf();
 
+def ComSaveFile():
+    return Com.sComSaveFile();
+    
 def PrjF_10mS_Com():
     Com.sPrjF_10mS_Com();    
     
