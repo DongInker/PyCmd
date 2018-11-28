@@ -40,24 +40,30 @@ class cCom(object):
         self.SetConfig = SetConfig;
         self.PrfClass  = int(GetConfig('Com', 'PrfClass',  '0'));
         self.ComNum    = int(GetConfig('Com', 'SerialNum', '1'));
-        
+        self.StartCon  =     GetConfig('Com', 'StartCon',  'open');
+
+        if(self.StartCon == 'open'):
+            self.ComConnect();
+            
     def sComSetCfg(self):
         self.SetConfig('Com', 'PrfClass',  str(self.PrfClass));
         self.SetConfig('Com', 'SerialNum', str(self.ComNum));
+        self.SetConfig('Com', 'StartCon',      self.StartCon);
         
     def ComMsg(self):
         print("LastEdit:2018/11/20");
         print("PrfClass:%d"%(self.PrfClass));
+        print("StartCon:%s"%(self.StartCon));
         print('Com Num :%d(%d)'%(self.ComNum,self.isConnected));
         print('Com Cfg BaudRat:%s DataBit:%s Parity:%s StopBit:%s'%(self.BaudRate,self.DataBit,self.Parity,self.StopBit));
         
     def ComPrf(self,PrfClass):
         self.PrfClass = PrfClass;
         self.sComSetCfg();# 保存串口参数
-        
-    def sComReset(self):
-        self.RxdHalfBuf  = '';
-        self.RxdHalfFlag = 0;
+
+    def sComStartCon(self,cmd):
+        self.StartCon = cmd;
+        self.sComSetCfg();
         
     def ComList(self):
         plist = list(self.ComMsgFunc())
@@ -76,9 +82,6 @@ class cCom(object):
             #self.ComTxt.write(txd);
             self.ComDll.sio_write(self.ComNum,txd,len(txd));
         
-    def ComRxdIsr(self,port):
-        num = self.ComDll.sio_iqueue(self.ComNum);
-        
     def ComConnect(self):
         ret = self.ComDll.sio_open(self.ComNum);
         if(ret != 0):
@@ -96,9 +99,9 @@ class cCom(object):
         self.isConnected = True;
         
     def ComDisconnent(self):
-        #self.ComDll.sio_cnt_irq(self.ComNum,0,0);
         self.ComDll.sio_close(self.ComNum);
         self.RxdHalfFlag = 0;
+        self.RxdHalfBuf  = '';
         self.isConnected = False;
         
     def SetComNum(self,comnum):
@@ -213,11 +216,11 @@ class cCom(object):
             print("  ComList      .. R- Com List");
             print("  ComNum       .. -W Set Com Num <1~255>");
             print("  ComClose     .. -W Close Com");
-            print("  ComBR        .. -W Set Com BaudRate <9600,115200>");
-            print("  ComDataBit   .. -W Set Com DataBit  <5,6,7,8>");
-            print("  ComParity    .. -W Set Com Parity   <None,Even,Odd>");
-            print("  ComStopBit   .. -W Set Com StopBit  <1,2>");
-            print("  ComReset     .. -W Reset Com Buffer");
+            #print("  ComBR        .. -W Set Com BaudRate <9600,115200>");
+            #print("  ComDataBit   .. -W Set Com DataBit  <5,6,7,8>");
+            #print("  ComParity    .. -W Set Com Parity   <None,Even,Odd>");
+            #print("  ComStopBit   .. -W Set Com StopBit  <1,2>");
+            print("  StartCon     .. -W Start Com Con <open,close>");
             return True;
 
         if(cmdlist[0] == 'commsg'):
@@ -249,10 +252,13 @@ class cCom(object):
         if(cmdlist[0] == 'comclose'):
             self.ComDisconnent();
             return True;
-
-        if(cmdlist[0] == 'comreset'):
-            self.sComReset();
-            return True;    
+            
+        if(cmdlist[0] == 'startcon'):
+            if(len(cmdlist) == 2):
+                self.sComStartCon(cmdlist[1]);
+                print('ComStartCon <= {0}'.format(cmdlist[1]));
+                return True;
+            return False;
             
         return False;
 
