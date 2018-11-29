@@ -110,9 +110,11 @@ class cMbsRtu(object):
             txd += '%02X '%(i);
         print(txd);
         #写入 XXXXmbs.txt 文件
-        f=open(self.mbs_name,'a');
-        f.write(txd+'\r\n');
-        f.close();
+        with open(self.mbs_name,'a') as f:
+            f.write(txd+'\r\n');
+        #f=open(self.mbs_name,'a');
+        #f.write(txd+'\r\n');
+        #f.close();
         
         self.MbsTxdFunc(data);
         self.RxdModeFunc(1);
@@ -137,9 +139,12 @@ class cMbsRtu(object):
             #写入 XXXXmbs.txt 文件
             rxd = '[%s]-Rxd<<:'%(datetime.datetime.now().strftime('%H:%M:%S.%f'));
             rxd += 'Ack Over Time!';
-            f=open(self.mbs_name,'a');
-            f.write(rxd+'\r\n');
-            f.close();
+
+            with open(self.mbs_name,'a') as f:
+                f.write(rxd+'\r\n');
+            #f=open(self.mbs_name,'a');
+            #f.write(rxd+'\r\n');
+            #f.close();
             
         if(self.isRxdModeFunc()==0):#应答成功
             self.AckCnt = 0;
@@ -152,9 +157,11 @@ class cMbsRtu(object):
                     rxd += '%02X '%(i);
                 print(rxd);
                 #写入 XXXXmbs.txt 文件
-                f=open(self.mbs_name,'a');
-                f.write(rxd+'\r\n');
-                f.close();
+                with open(self.mbs_name,'a') as f:
+                    f.write(rxd+'\r\n');
+                #f=open(self.mbs_name,'a');
+                #f.write(rxd+'\r\n');
+                #f.close();
                 
     def sMbsRtuCmd(self,incmd):
         # 空格进行切割

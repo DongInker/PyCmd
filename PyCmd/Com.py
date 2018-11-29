@@ -32,6 +32,7 @@ class cCom(object):
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         path = os.path.dirname(os.getcwd()) + '\\Logs\\';
         self.com_name = path + rq + 'com.txt';
+        
         f=open(self.com_name,'a');
         f.close();
             
@@ -193,9 +194,11 @@ class cCom(object):
             sys.stdout.flush();
             
             # 写入 XXXXcom.txt 文件
-            f=open(self.com_name,'a');
-            f.write(rxdstr);
-            f.close();
+            with open(self.com_name,'a') as f:
+                f.write(rxdstr);
+            #f=open(self.com_name,'a');
+            #f.write(rxdstr);
+            #f.close();
             
     def sComSaveFile(self):
         return self.com_name;

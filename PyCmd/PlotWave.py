@@ -75,10 +75,12 @@ class cPlotWave(object):
                 for i in self.WaveBuf:
                     buf += "%f,"%(i);
                 buf += ']\r\n';
-                
-                f=open(self.wave_name,'a');
-                f.write(buf);
-                f.close();
+
+                with open(self.wave_name,'a') as f:
+                    f.write(buf);
+                #f=open(self.wave_name,'a');
+                #f.write(buf);
+                #f.close();
                 self.WaveBuf    = [];
         
     def sPlotWaveAdd(self,val):
@@ -102,9 +104,12 @@ class cPlotWave(object):
         if(self.ComfileSize != flen):
             self.ComfileSize = flen;
             self.WaveBuf     = [];
-            f = open(ComSaveFile());
-            data = f.read();
-            f.close();
+
+            with open(ComSaveFile()) as f:
+                data = f.read();
+            #f = open(ComSaveFile());
+            #data = f.read();
+            #f.close();
 
             if(self.PlotReV):
                 self.PlotReStr = ".*" + self.PlotReL + "([0X]?[0-9a-fA-F]\w*)" + self.PlotReR;

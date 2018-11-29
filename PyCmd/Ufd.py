@@ -67,10 +67,13 @@ class cUfd(object):
                 
     def sUfdBtnReadCfg(self):
         #读取文件数据
+        
         fpath = os.path.dirname(os.getcwd()) + "\\PyCmd\\ButtonBarV3.ini";
-        f=open(fpath,'r',encoding='utf-8');
-        lines = f.readlines();
-        f.close();
+        with open(fpath,'r',encoding='utf-8') as f:
+            lines = f.readlines();
+        #f=open(fpath,'r',encoding='utf-8');
+        #lines = f.readlines();
+        #f.close();
 
         self.CmdPrj  = [];
         self.CmdNum  = [];
@@ -106,10 +109,14 @@ class cUfd(object):
         
     def sUfdButtonCfg(self):
         try:
-            f=open(os.getcwd()+"\\ButtonBarV3.ini",'r',encoding='utf-8');
-            self.BtnTxtLines = '';
-            self.BtnTxtLines = f.readlines();
-            f.close();
+            with open(os.getcwd()+"\\ButtonBarV3.ini",'r',encoding='utf-8') as f:
+                self.BtnTxtLines = '';
+                self.BtnTxtLines = f.readlines();           
+            #f=open(os.getcwd()+"\\ButtonBarV3.ini",'r',encoding='utf-8');
+            #self.BtnTxtLines = '';
+            #self.BtnTxtLines = f.readlines();
+            #f.close();
+            
             self.BtnTxdFlag = 1;
             print(self.BtnTxtLines[0],end='');
             print(self.BtnTxtLines[1],end='');
