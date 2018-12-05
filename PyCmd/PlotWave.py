@@ -7,6 +7,7 @@ from pylab import plot,ion,subplot,figure,grid,pause,show,close,clf
 from pylab import title,xlabel,ylabel,xlim,ylim,legend
 from format    import isFloatType;
 from Log import Log;
+from Com import ComSaveFile;
 
 class cPlotWave(object):
     def __init__(self):
@@ -21,6 +22,8 @@ class cPlotWave(object):
         
         self.PlotReStr = '';
         self.PlotReEn  = 0;
+        self.PlotPosS  = 0;
+
         #创建波形记录文件路径
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         path = os.path.dirname(os.getcwd()) + '/Logs/';
@@ -45,7 +48,7 @@ class cPlotWave(object):
         print("PrfClass :%d"%(self.PrfClass));
         print("Cnt10mS  :%d"%(self.Cnt10mS));
         print("PlotReEn :%d"%(self.PlotReEn));
-        print("PlotReV  :%d"%(self.PlotReV));
+        print("PlotReV  :(%d)%s"%(self.PlotReV,self.PlotReV and "Hex" or "Float"));
         print("PlotReL  :%s"%(self.PlotReL));
         print("PlotReR  :%s"%(self.PlotReR));
         
@@ -81,7 +84,22 @@ class cPlotWave(object):
                 #f=open(self.wave_name,'a');
                 #f.write(buf);
                 #f.close();
-                self.WaveBuf    = [];
+        
+        if(self.PlotReEn == 1):
+            #写入 XXXXmbs.txt 文件
+            if(len(self.WaveBuf)):
+                buf = 'wave=[';
+                for i in self.WaveBuf:
+                    buf += "%f,"%(i);
+                buf += ']\r\n';
+
+                with open(self.wave_name,'a') as f:
+                    f.write(buf);
+
+            with open(ComSaveFile()) as f:
+                data = f.read();
+            self.PlotPosS = len(data); 
+            #print("%d"%(self.PlotPosS));
         
     def sPlotWaveAdd(self,val):
         self.WaveBuf.append(val);
@@ -99,7 +117,6 @@ class cPlotWave(object):
         if(self.PlotReEn == 0):
             return 0;
             
-        from Com import ComSaveFile;
         flen = os.path.getsize(ComSaveFile())
         if(self.ComfileSize != flen):
             self.ComfileSize = flen;
@@ -110,13 +127,18 @@ class cPlotWave(object):
             #f = open(ComSaveFile());
             #data = f.read();
             #f.close();
+            #print("%d %d"%(len(data),self.PlotPosS));
+            data = data[self.PlotPosS:];
+            #print("%d"%(len(data)));
 
             if(self.PlotReV):
+                self.WaveBuf    = [];
                 self.PlotReStr = ".*" + self.PlotReL + "([0X]?[0-9a-fA-F]\w*)" + self.PlotReR;
                 iter = re.finditer(self.PlotReStr,data);
                 for i in iter:
                     self.WaveBuf.append(int(i.group(1),16));
             else:
+                self.WaveBuf    = [];
                 self.PlotReStr = ".*" + self.PlotReL + "([-+]?[0-9]\d*\.?[0-9]\d*|[-+]?\.?[0-9]\d*|[-+]?[0-9]\d*\.?)" + self.PlotReR;
                 iter = re.finditer(self.PlotReStr,data);
                 for i in iter:
