@@ -10,7 +10,7 @@ class cAutoTxd(object):
         self.Cnt10mS   = 0;
         self.AutoTxdEn = 0 ;
         self.TxdCmd    = 'help';
-        
+        self.TxdFlag   = 0; 
         #¶ÁÈ¡ÅäÖÃ²ÎÊý
         from Config import GetConfig,SetConfig;
         self.SetConfig = SetConfig;
@@ -37,7 +37,8 @@ class cAutoTxd(object):
         self.Cnt10mS += 1;
         if(self.Cnt10mS >= self.Time10mS):
             self.Cnt10mS = 0;
-            self.TxdFunc(self.TxdCmd);
+            self.TxdFlag = 1; 
+            #self.TxdFunc(self.TxdCmd);
             
     def SetAutoTime(self,time10ms):
         self.Time10mS = time10ms;
@@ -111,6 +112,14 @@ def AutoTxdCmd(incmd):
 def SetAutoTxdEn(en):
     AutoTxd.sSetAutoTxdEn(en);
     
+def isAutoTxdFlag():
+    flag = AutoTxd.TxdFlag;
+    AutoTxd.TxdFlag = 0;
+    return flag;
+
+def GetAutoTxdCmd():
+    return AutoTxd.TxdCmd;
+
 def PrjB_10mS_AutoTxd():
     AutoTxd.sAutoTxd_10mS();
 

@@ -172,7 +172,7 @@ def PrjB_10mS_Key():
 from Config    import ConfigCmd;
 from Log       import LogCmd,Log;
 from Demo      import DemoCmd,PrjF_10mS_Demo,PrjB_10mS_Demo;
-from AutoTxd   import AutoTxdCmd,SetAutoTxdEn,PrjB_10mS_AutoTxd;
+from AutoTxd   import AutoTxdCmd,SetAutoTxdEn,PrjB_10mS_AutoTxd,isAutoTxdFlag,GetAutoTxdCmd;
 from Com       import ComCmd,PrjF_10mS_Com;
 from Ufd       import UfdCmd,isUfdMode,UfdSetMode,UfdTxd;
 from MbsRtu    import MbsRtuCmd,PrjB_10mS_MbsRtu;
@@ -238,6 +238,9 @@ if __name__ == '__main__':
             time.sleep(0.01); 
             for PrjB10mS in PrjB10mS_FuncLst:
                 PrjB10mS();
+            if(isAutoTxdFlag()):
+                if(SysHelp(GetAutoTxdCmd()) == False):
+                    print("unknown Cmd");
         else:
             if(inkey != ''):
                 key = inkey;
