@@ -4,7 +4,8 @@ import configparser
 # 重写配置 ConfigParser配置option的大小写问题
 class NewConfigParser(configparser.ConfigParser):
     def optionxform(self, optionstr):
-        return optionstr
+        #return optionstr.lower();  #  Old
+        return optionstr            #  New
         
 class cConfig(object):
     def __init__(self):
