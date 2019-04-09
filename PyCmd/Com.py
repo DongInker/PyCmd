@@ -42,6 +42,7 @@ class cCom(object):
         self.PrfClass  = int(GetConfig('Com', 'PrfClass',  '0'));
         self.ComNum    = int(GetConfig('Com', 'SerialNum', '1'));
         self.StartCon  =     GetConfig('Com', 'StartCon',  'open');
+        self.BinPath   =     GetConfig('Com', 'BinPath',  r'C:\Users\Inker\Desktop');
 
         if(self.StartCon == 'open'):
             self.ComConnect();
@@ -50,6 +51,7 @@ class cCom(object):
         self.SetConfig('Com', 'PrfClass',  str(self.PrfClass));
         self.SetConfig('Com', 'SerialNum', str(self.ComNum));
         self.SetConfig('Com', 'StartCon',      self.StartCon);
+        self.SetConfig('Com', 'BinPath',       self.BinPath);
         
     def ComMsg(self):
         print("LastEdit:2018/11/20");
@@ -308,29 +310,32 @@ ccb = CALLBACK(cb)
 import os
 import tkinter,tkinter.filedialog
 #选择烧写文件对话框：
-default_dir=r"C:\Users\Inker\Desktop";#r表示后面是一个原始字符串
 def BinPath():
     # 直接使用askopenfilename 会出现一个未响应的TK窗口 解决方法:创建一个窗口 再隐藏
     root = tkinter.Tk();
     root.withdraw();
-    fpos = tkinter.filedialog.askopenfilename(title=u'Open File',initialdir=(os.path.expanduser((default_dir))));
+    fpos = tkinter.filedialog.askopenfilename(title=u'Open File',initialdir=(os.path.expanduser((Com.BinPath))));
     return fpos;
 
-def ComYmodemTx():
+def ComYmodemTx(mode = 0):
     fpos = BinPath();
     if(fpos==''):#取消选择文件 直接结束下载
         return ;
 
-    ComSend('inker'); # 回车
-    time.sleep(0.5);
-    ComSend('inker'); # 登录口令
-    time.sleep(0.5);
-    ComSend('iap');   # 烧写命令
-    time.sleep(0.5);
-    ComSend('1',0);   # 选择烧写程序
-    time.sleep(0.5);
-    #ComSend('a',0);
-    #ComSend('2',0);
+    Com.BinPath = fpos;
+    Com.sComSetCfg(); # 存储文件路径
+
+    if(mode == 0):
+        ComSend('inker'); # 回车
+        time.sleep(0.5);
+        ComSend('inker'); # 登录口令
+        time.sleep(0.5);
+        ComSend('iap');   # 烧写命令
+        time.sleep(0.5);
+        ComSend('1',0);   # 选择烧写程序
+        time.sleep(0.5);
+        #ComSend('a',0);
+        #ComSend('2',0);
     
     Com.ComDll.sio_FtYmodemTx(Com.GetComNum(),fpos.encode('ascii'), ccb, 27);
     print();

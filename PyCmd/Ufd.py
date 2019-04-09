@@ -52,8 +52,8 @@ class cUfd(object):
     def sUfdSendData(self,cmd,Enter=1):   
         self.UfdTxdFunc(cmd,Enter);
         
-    def sUfdIap(self):
-        self.UfdIapFunc();
+    def sUfdIap(self,mode=0):
+        self.UfdIapFunc(mode);
 
     # UFD GUI
     def sindex_of_str(self,s1,s2):
@@ -229,6 +229,7 @@ class cUfd(object):
             print("  UfdMode     .. -W Go To UFD Mode");
             print("  UFD         .. -W Ufd Send Cmd <str>");
             print("  UfdIap      .. -W Ymodem Load Bin");
+            print("  UfdIapC     .. -W Ymodem Load Bin in Rxd C");
             print("  UfdGui      .. -W UFD GUI");
             return True;
 
@@ -257,7 +258,11 @@ class cUfd(object):
                 
         # 升级单片机程序
         if(cmdlist[0] == 'ufdiap'):
-            self.sUfdIap();
+            self.sUfdIap(0);
+            return True;    
+
+        if(cmdlist[0] == 'ufdiapc'):
+            self.sUfdIap(1);
             return True;    
 
         if(cmdlist[0] == 'ufdgui'):
