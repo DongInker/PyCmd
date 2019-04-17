@@ -1,3 +1,0 @@
----- self.UfdTxdFunc Matches (2 in 1 files) ----
-Ufd.py (e:\inkersys\softwarecfg\python\project\pycmd\pycmd):        self.UfdTxdFunc = ComSend;
-Ufd.py (e:\inkersys\softwarecfg\python\project\pycmd\pycmd):        self.UfdTxdFunc(cmd,Enter);

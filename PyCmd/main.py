@@ -139,6 +139,13 @@ class cKeyCmd(object):
                 self.WorkMode = 0;
                 print('\nUfd Mode Go to Python Mode!');
                 self.RxdBuf = 'help';
+            elif(self.RxdBuf == 'iap'): #UfdMode下IAP直接升级
+                from Com import ComSend,ComYmodemTx;
+                UfdTxd('');       #iap之后发送一个回车
+                time.sleep(0.5);  #延时一段时间 给单片机复位进入boot系统
+                ComSend('1',0);   #发送1 进入Ymodem程序下载
+                ComYmodemTx(1);   #直接进入Ymodem模式升级
+                self.RxdBuf = '';
             else:
                 UfdTxd('');
                 self.RxdBuf = '';
