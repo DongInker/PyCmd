@@ -79,3 +79,25 @@ def PrjF_10mS_Demo():
 def PrjB_10mS_Demo():
     Demo.sPrjB_10mS_Demo();
     
+########################### Test Demo.py
+if __name__ == '__main__':
+    #初始化参数
+
+    #进入调试循环
+    while True:
+        InCmd = input();
+
+        #模拟定时任务处理
+        PrjF_10mS_Demo();
+        PrjB_10mS_Demo();
+
+        #退出模块调试命令
+        if(InCmd == 'exit'):
+            break;
+
+        if(len(InCmd.split()) != 0):#保证输入空格不闪退
+            if(DemoCmd(InCmd) == False):
+                InCmd = InCmd.lower();#统一转换小写
+                if(InCmd != 'help'):
+                    print("unknown Cmd");
+

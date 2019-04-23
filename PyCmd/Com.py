@@ -5,6 +5,16 @@ import time
 
 from Log import Log;
 
+ComBrtTab = {
+"1200"  :0X07,
+"2400"  :0X09,
+"4800"  :0X0A,
+"9600"  :0X0C,
+"19200" :0X0D,
+"38400" :0X0E,
+"57600" :0X0F,
+"115200":0X10};
+
 class cCom(object):
     def __init__(self,prf=0,com=6):
 
@@ -16,7 +26,6 @@ class cCom(object):
         self.ComMsgFunc = serial.tools.list_ports.comports;#获取串口信息
         self.ComDll     = windll.LoadLibrary("PCOMM.DLL");
         
-        self.BaudRate = '115200'; # 9600 38400 115200
         self.DataBit  = '8';      # 5 6 7 8
         self.Parity   = 'None';   # None Even Odd Mark Space
         self.StopBit  = '1';      # 1 1.5 2
@@ -43,6 +52,7 @@ class cCom(object):
         self.ComNum    = int(GetConfig('Com', 'SerialNum', '1'));
         self.StartCon  =     GetConfig('Com', 'StartCon',  'open');
         self.BinPath   =     GetConfig('Com', 'BinPath',  r'C:\Users\Inker\Desktop');
+        self.BaudRate  =     GetConfig('Com', 'Baudrate',  '115200');
 
         if(self.StartCon == 'open'):
             self.ComConnect();
@@ -52,13 +62,15 @@ class cCom(object):
         self.SetConfig('Com', 'SerialNum', str(self.ComNum));
         self.SetConfig('Com', 'StartCon',      self.StartCon);
         self.SetConfig('Com', 'BinPath',       self.BinPath);
+        self.SetConfig('Com', 'Baudrate',      self.BaudRate);
         
     def ComMsg(self):
         print("LastEdit:2018/11/20");
         print("PrfClass:%d"%(self.PrfClass));
         print("StartCon:%s"%(self.StartCon));
         print('Com Num :%d(%d)'%(self.ComNum,self.isConnected));
-        print('Com Cfg BaudRat:%s DataBit:%s Parity:%s StopBit:%s'%(self.BaudRate,self.DataBit,self.Parity,self.StopBit));
+        print('Com Brt :%s'%(self.BaudRate));
+        print('Com Cfg DataBit:%s Parity:%s StopBit:%s'%(self.DataBit,self.Parity,self.StopBit));
         
     def ComPrf(self,PrfClass):
         self.PrfClass = PrfClass;
@@ -89,11 +101,16 @@ class cCom(object):
         ret = self.ComDll.sio_open(self.ComNum);
         if(ret != 0):
             print("Open <Com%d> Error %d!"%(self.ComNum,ret));
+
+            #发现设置波特率后切换串口 返回-5 添加这句达到重启作用
+            self.ComDll.sio_close(self.ComNum);
+
             self.isConnected = False;
             return ret;
 
         # 115200, 无校验，8位数据位，1位停止位
-        ret = self.ComDll.sio_ioctl(self.ComNum, 16, 0x00 | 0x03 | 0x00);
+        #ret = self.ComDll.sio_ioctl(self.ComNum, 16, 0x00 | 0x03 | 0x00);
+        ret = self.ComDll.sio_ioctl(self.ComNum, ComBrtTab[self.BaudRate], 0x00 | 0x03 | 0x00);
         if(ret != 0):
             print("Config <Com%d> Param Error %d!"%(self.ComNum,ret));
             return 0;
@@ -117,7 +134,21 @@ class cCom(object):
         
     def GetComNum(self):
         return self.ComNum;
-        
+    
+    def SetComBaudrate(self,baudrate):
+        if baudrate in ComBrtTab:
+            ret = self.ComDll.sio_baud(self.ComNum, int(baudrate));
+            if(ret != 0):
+                print("Set <Com%d> Baudrate Error %d!"%(self.ComNum,ret));
+                return False;
+            self.BaudRate = baudrate;
+            self.sComSetCfg();
+            return True;
+        else:
+            for dict_key, dict_value in ComBrtTab.items():  
+                print(dict_key);
+            return False;
+
     def sSetRxdMode(self,mode):
         self.RxdMode = mode;
         if(mode == 1):
@@ -221,7 +252,7 @@ class cCom(object):
             print("  ComList      .. R- Com List");
             print("  ComNum       .. -W Set Com Num <1~255>");
             print("  ComClose     .. -W Close Com");
-            #print("  ComBR        .. -W Set Com BaudRate <9600,115200>");
+            print("  ComBR        .. -W Set Com BaudRate <9600,115200>");
             #print("  ComDataBit   .. -W Set Com DataBit  <5,6,7,8>");
             #print("  ComParity    .. -W Set Com Parity   <None,Even,Odd>");
             #print("  ComStopBit   .. -W Set Com StopBit  <1,2>");
@@ -254,6 +285,15 @@ class cCom(object):
                 return True;
             return False;
             
+        if(cmdlist[0] == 'combr'):
+            if(len(cmdlist) == 2):
+                if(cmdlist[1].isdigit() == False):#不是数字直接结束
+                    return False;
+                if(self.SetComBaudrate(cmdlist[1]) == True):
+                    print('ComNum <= {0}'.format(cmdlist[1]));
+                    return True;
+            return False;
+
         if(cmdlist[0] == 'comclose'):
             self.ComDisconnent();
             return True;
