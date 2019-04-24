@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
-
 class cDemo(object):
     def __init__(self):
     
@@ -21,7 +19,7 @@ class cDemo(object):
         self.SetConfig('Demo', 'PrfClass', str(self.PrfClass));
         
     def sDemoMsg(self):
-        print("LastEdit:2018/11/05");
+        print("LastEdit:2019/04/24");
         print("PrfClass:%d"%(self.PrfClass));
         print("PrjFCnt10mS :%d"%(self.PrjFCnt10mS));
         print("PrjBCnt10mS :%d"%(self.PrjBCnt10mS));
@@ -81,23 +79,32 @@ def PrjB_10mS_Demo():
     
 ########################### Test Demo.py
 if __name__ == '__main__':
+
     #初始化参数
+    InCmd = ".Demo"
+    print("In Key [exit] Exit Debug!");
 
     #进入调试循环
     while True:
-        InCmd = input();
+        InKey = input();
 
         #模拟定时任务处理
         PrjF_10mS_Demo();
         PrjB_10mS_Demo();
 
         #退出模块调试命令
-        if(InCmd == 'exit'):
+        if(InKey == 'exit'):
             break;
 
+        if(len(InKey.split()) != 0):#回车重复执行上次
+            InCmd = InKey;
+        else:
+            print(InCmd);
+            
         if(len(InCmd.split()) != 0):#保证输入空格不闪退
             if(DemoCmd(InCmd) == False):
-                InCmd = InCmd.lower();#统一转换小写
-                if(InCmd != 'help'):
+                if(InCmd.lower() != 'help'):
                     print("unknown Cmd");
+
+        print("InCmd>>>",end="");
 

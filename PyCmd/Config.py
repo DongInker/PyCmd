@@ -96,3 +96,31 @@ def GetConfig(Section,Option,DefaultVal):
 def SetConfig(Section,Option,Val):
     Config.sConfigSet(Section,Option,Val);
     
+########################### Test Config.py
+if __name__ == '__main__':
+    #初始化参数
+    InCmd = ".Config"
+    print("In Key [exit] Exit Debug!");
+
+    #进入调试循环
+    while True:
+        InKey = input();
+
+        #模拟定时任务处理
+
+        #退出模块调试命令
+        if(InKey == 'exit'):
+            break;
+
+        if(len(InKey.split()) != 0):#回车重复执行上次
+            InCmd = InKey;
+        else:
+            print(InCmd);
+            
+        if(len(InCmd.split()) != 0):#保证输入空格不闪退
+            if(ConfigCmd(InCmd) == False):
+                if(InCmd.lower() != 'help'):
+                    print("unknown Cmd");
+
+        print("InCmd>>>",end="");
+

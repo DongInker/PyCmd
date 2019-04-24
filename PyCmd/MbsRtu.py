@@ -1,3 +1,5 @@
+ 
+# -*- coding: utf-8 -*-
 
 import sys
 import os.path
@@ -66,6 +68,12 @@ class cMbsRtu(object):
         
         self.AckCnt    = 0;
 
+        self.TxdHexEn      = 0;
+        self.TxdHexCnt     = 0;
+        self.TxdHexTim10mS = 100;
+        self.TxdHexTimCnt  = 0;
+        self.TxdCntVal     = 0;
+
         #创建串口通信记录文件路径
         rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         path = os.path.dirname(os.getcwd()) + '/Logs/';
@@ -88,6 +96,8 @@ class cMbsRtu(object):
         print("PrfClass :%d"%(self.PrfClass));
         print("SlaveID  :%d"%(self.SlaveID));
         print("AckWait  :%dmS"%(self.AckWaitmS*10));
+        print("TxdHexEn :%d"%(self.TxdHexEn));
+        print("TxdHexTim:%dmS"%(self.TxdHexTim10mS));
         
     def MbsRtuPrf(self,PrfClass):
         self.PrfClass = PrfClass;
@@ -128,10 +138,32 @@ class cMbsRtu(object):
         data = struct.pack('>BBHH',self.SlaveID,6,addr,val);
         self.MbsSend(data);
         
+    def sTxdHexEn(self,en):
+        self.TxdHexEn = en;
+        self.TxdHexTimCnt  = self.TxdHexTim10mS;
+
+    def sTxdHexTime(self,t10ms):
+        self.TxdHexTim10mS = t10ms;
+
+    def sTxdHexTest(self):
+        self.TxdHexTimCnt += 1;
+        if(self.TxdHexTimCnt >= self.TxdHexTim10mS):
+            self.TxdHexTimCnt = 0;
+            self.TxdCntVal += 1;
+            if(self.TxdCntVal  >= 10000):
+                self.TxdCntVal = 0;
+                
+            data = struct.pack('>HBH',0XFFFF,0X17,self.TxdCntVal);
+            self.MbsSend(data);
+
     def sMbsRtu_10mS(self):
+        
+        if(self.TxdHexEn):
+            self.sTxdHexTest();    
+
         if(self.AckCnt == 0):
             return 0;
-            
+
         self.AckCnt -= 1;
         if(self.AckCnt == 0):#应答超时
             self.RxdModeFunc(0);
@@ -181,6 +213,8 @@ class cMbsRtu(object):
             print("  Mbs03       .. -W Modbus Func 0X03 <addr,num>");
             print("  Mbs06       .. -W Modbus Func 0X06 <addr,val>");
             print("  Mbsf        .. -W Modbus float <addr> [val]");
+            print("  TxdHexEn    .. -W Txd Hex En <0,1>");
+            print("  TxdHexTime  .. -W Txd Hex Time 10mS <val>");
             return True;
 
         if(cmdlist[0] == 'mbsrtumsg'):
@@ -252,6 +286,24 @@ class cMbsRtu(object):
                 return True;
             return False;
             
+        if(cmdlist[0] == 'txdhexen'):
+            if(len(cmdlist) == 2):
+                if(cmdlist[1].isdigit() == False):#不是数字直接结束
+                    return False;
+                self.sTxdHexEn(int(cmdlist[1]));
+                print('TxdHexEn <= %smS'%(cmdlist[1]));
+                return True;
+            return False;        
+
+        if(cmdlist[0] == 'txdhextime'):
+            if(len(cmdlist) == 2):
+                if(cmdlist[1].isdigit() == False):#不是数字直接结束
+                    return False;
+                self.sTxdHexTime(int(cmdlist[1]));
+                print('TxdHexTime <= %smS'%(int(cmdlist[1])*10));
+                return True;
+            return False;        
+
         return False;
 
 # 实例化类
@@ -263,3 +315,32 @@ def MbsRtuCmd(incmd):
 def PrjB_10mS_MbsRtu():
     MbsRtu.sMbsRtu_10mS();
     
+########################### Test MbsRtu.py
+if __name__ == '__main__':
+    #初始化参数
+    InCmd = ".MbsRtu"
+    print("In Key [exit] Exit Debug!");
+
+    #进入调试循环
+    while True:
+        InKey = input();
+
+        #模拟定时任务处理
+        PrjB_10mS_MbsRtu();
+
+        #退出模块调试命令
+        if(InKey == 'exit'):
+            break;
+
+        if(len(InKey.split()) != 0):#回车重复执行上次
+            InCmd = InKey;
+        else:
+            print(InCmd);
+            
+        if(len(InCmd.split()) != 0):#保证输入空格不闪退
+            if(MbsRtuCmd(InCmd) == False):
+                if(InCmd.lower() != 'help'):
+                    print("unknown Cmd");
+
+        print("InCmd>>>",end="");
+

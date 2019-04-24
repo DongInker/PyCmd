@@ -34,8 +34,8 @@ class cPlotWave(object):
         self.SetConfig = SetConfig;
         self.PrfClass  = int(GetConfig('PlotWave', 'PrfClass','0'));
         self.PlotReV   = int(GetConfig('PlotWave', 'PlotReV', '0'));
-        self.PlotReL   =     GetConfig('PlotWave', 'PlotReL', 's');
-        self.PlotReR   =     GetConfig('PlotWave', 'PlotReR', 'e'); 
+        self.PlotReL   =     GetConfig('PlotWave', 'PlotReL', '\(');
+        self.PlotReR   =     GetConfig('PlotWave', 'PlotReR', '\)'); 
 
     def sPlotWaveSetCfg(self):
         self.SetConfig('PlotWave', 'PrfClass', str(self.PrfClass));
@@ -132,7 +132,7 @@ class cPlotWave(object):
             #print("%d"%(len(data)));
 
             if(self.PlotReV):
-                self.WaveBuf    = [];
+                self.WaveBuf   = [];
                 self.PlotReStr = ".*" + self.PlotReL + "([0X]?[0-9a-fA-F]\w*)" + self.PlotReR;
                 iter = re.finditer(self.PlotReStr,data);
                 for i in iter:
@@ -166,9 +166,10 @@ class cPlotWave(object):
             print("  PlotWaveMsg .. R- PlotWave Message");
             print("  PlotWavePrf .. -W PlotWave Printf Class <0,1>");
             print("  PlotAdd     .. -W Add Wave Data <float>");
-            print("  PlotReEn    .. -W Re Plot Wave En <0,1>");
+            print("  PlotReEn    .. -W Re Plot Wave En (0close)<0,1>");
             print("  PlotReL     .. -W Re Lift  String");
             print("  PlotReR     .. -W Re Right String");
+            print("  特殊字符需要前面加\  .^$*+?{}[]\|()");
             print("  PlotReV     .. -W Re Val Type 0Dec 1Hex <0,1>");
             return True;
 
