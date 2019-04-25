@@ -184,7 +184,7 @@ from Com       import ComCmd,PrjF_10mS_Com;
 from Ufd       import UfdCmd,isUfdMode,UfdSetMode,UfdTxd;
 from MbsRtu    import MbsRtuCmd,PrjB_10mS_MbsRtu;
 from format    import FormatCmd;
-from PlotWave  import PlotWaveCmd,PrjF_10mS_Plot,PrjB_10mS_Plot;
+from PlotRe    import PlotReCmd,PrjF_10mS_PlotRe,PrjB_10mS_PlotRe;
 
 #命令行执行函数
 Cmd_FuncLst = [
@@ -196,7 +196,7 @@ AutoTxdCmd,
 ComCmd,
 UfdCmd,
 FormatCmd,
-PlotWaveCmd,
+PlotReCmd,
 MbsRtuCmd];
 
 #后台定时调用函数
@@ -204,13 +204,13 @@ PrjB10mS_FuncLst = [
 PrjB_10mS_Key,
 PrjB_10mS_Demo,
 PrjB_10mS_AutoTxd,
-PrjB_10mS_Plot,
+PrjB_10mS_PlotRe,
 PrjB_10mS_MbsRtu];
 
 #前台定时调用函数
 PrjF10mS_FuncLst = [
 PrjF_10mS_Com,
-PrjF_10mS_Plot,
+PrjF_10mS_PlotRe,
 PrjF_10mS_Demo]; 
 
 ##########################################################

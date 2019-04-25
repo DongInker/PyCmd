@@ -227,8 +227,12 @@ class cCom(object):
             sys.stdout.flush();
             
             # 写入 XXXXcom.txt 文件
-            with open(self.com_name,'a') as f:
+            #try:
+            with open(self.com_name,'a',encoding='utf-8') as f:
                 f.write(rxdstr);
+            #except Exception as e:
+            #    Log.logger.error(e);
+
             #f=open(self.com_name,'a');
             #f.write(rxdstr);
             #f.close();

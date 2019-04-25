@@ -9,7 +9,7 @@ from format    import isFloatType;
 from Log import Log;
 from Com import ComSaveFile;
 
-class cPlotWave(object):
+class cPlotRe(object):
     def __init__(self):
     
         # 调用外部包 模块
@@ -32,18 +32,18 @@ class cPlotWave(object):
         #读取配置参数
         from Config import GetConfig,SetConfig;
         self.SetConfig = SetConfig;
-        self.PrfClass  = int(GetConfig('PlotWave', 'PrfClass','0'));
-        self.PlotReV   = int(GetConfig('PlotWave', 'PlotReV', '0'));
-        self.PlotReL   =     GetConfig('PlotWave', 'PlotReL', '\(');
-        self.PlotReR   =     GetConfig('PlotWave', 'PlotReR', '\)'); 
+        self.PrfClass  = int(GetConfig('PlotRe', 'PrfClass','0'));
+        self.PlotReV   = int(GetConfig('PlotRe', 'PlotReV', '0'));
+        self.PlotReL   =     GetConfig('PlotRe', 'PlotReL', '\(');
+        self.PlotReR   =     GetConfig('PlotRe', 'PlotReR', '\)'); 
 
-    def sPlotWaveSetCfg(self):
-        self.SetConfig('PlotWave', 'PrfClass', str(self.PrfClass));
-        self.SetConfig('PlotWave', 'PlotReV',  str(self.PlotReV));        
-        self.SetConfig('PlotWave', 'PlotReL',      self.PlotReL);
-        self.SetConfig('PlotWave', 'PlotReR',      self.PlotReR);
+    def sPlotReSetCfg(self):
+        self.SetConfig('PlotRe', 'PrfClass', str(self.PrfClass));
+        self.SetConfig('PlotRe', 'PlotReV',  str(self.PlotReV));        
+        self.SetConfig('PlotRe', 'PlotReL',      self.PlotReL);
+        self.SetConfig('PlotRe', 'PlotReR',      self.PlotReR);
         
-    def sPlotWaveMsg(self):
+    def sPlotReMsg(self):
         print("LastEdit :2018/11/05");
         print("PrfClass :%d"%(self.PrfClass));
         print("Cnt10mS  :%d"%(self.Cnt10mS));
@@ -52,21 +52,21 @@ class cPlotWave(object):
         print("PlotReL  :%s"%(self.PlotReL));
         print("PlotReR  :%s"%(self.PlotReR));
         
-    def sPlotWavePrf(self,PrfClass):
+    def sPlotRePrf(self,PrfClass):
         self.PrfClass = PrfClass;
-        self.sPlotWaveSetCfg();
+        self.sPlotReSetCfg();
 
     def sPlotReL(self,strl):
         self.PlotReL = strl;
-        self.sPlotWaveSetCfg();
+        self.sPlotReSetCfg();
         
     def sPlotReR(self,strr):
         self.PlotReR = strr;
-        self.sPlotWaveSetCfg();
+        self.sPlotReSetCfg();
         
     def sPlotReV(self,mode):
         self.PlotReV = mode;
-        self.sPlotWaveSetCfg();
+        self.sPlotReSetCfg();
 
     def sPlotReEn(self,en):
         self.PlotReEn = en;
@@ -79,7 +79,7 @@ class cPlotWave(object):
                     buf += "%f,"%(i);
                 buf += ']\r\n';
 
-                with open(self.wave_name,'a') as f:
+                with open(self.wave_name,'a',encoding='utf-8') as f:
                     f.write(buf);
                 #f=open(self.wave_name,'a');
                 #f.write(buf);
@@ -93,15 +93,15 @@ class cPlotWave(object):
                     buf += "%f,"%(i);
                 buf += ']\r\n';
 
-                with open(self.wave_name,'a') as f:
+                with open(self.wave_name,'a',encoding='utf-8') as f:
                     f.write(buf);
 
-            with open(ComSaveFile()) as f:
+            with open(ComSaveFile(),encoding='utf-8') as f:
                 data = f.read();
             self.PlotPosS = len(data); 
             #print("%d"%(self.PlotPosS));
         
-    def sPlotWaveAdd(self,val):
+    def sPlotReAdd(self,val):
         self.WaveBuf.append(val);
         clf();#清除之前画的数据
         plot(self.WaveBuf);
@@ -110,10 +110,10 @@ class cPlotWave(object):
         legend();#显示浮动窗口
         pause(0.001);#画布停留活动时间
         
-    def sPrjF_10mS_Plot(self):
+    def sPrjF_10mS_PlotRe(self):
         self.Cnt10mS += 1;
             
-    def sPrjB_10mS_Plot(self):   
+    def sPrjB_10mS_PlotRe(self):   
         if(self.PlotReEn == 0):
             return 0;
             
@@ -122,7 +122,7 @@ class cPlotWave(object):
             self.ComfileSize = flen;
             self.WaveBuf     = [];
 
-            with open(ComSaveFile()) as f:
+            with open(ComSaveFile(),encoding='utf-8') as f:
                 data = f.read();
             #f = open(ComSaveFile());
             #data = f.read();
@@ -152,19 +152,19 @@ class cPlotWave(object):
                 legend();#显示浮动窗口
                 pause(0.001);#画布停留活动时间
     
-    def sPlotWaveCmd(self,incmd):
+    def sPlotReCmd(self,incmd):
         # 空格进行切割
         cmdlist = incmd.split();
         cmdlist[0]  = cmdlist[0].lower();#命令字符串 转换小写
         
         if(cmdlist[0] == 'help'):
-            print('  .PlotWave');
+            print('  .PlotRe');
             return False;
 
-        if(cmdlist[0] == '.plotwave'):
+        if(cmdlist[0] == '.plotre'):
            #print("------------- .. RW ------------");
-            print("  PlotWaveMsg .. R- PlotWave Message");
-            print("  PlotWavePrf .. -W PlotWave Printf Class <0,1>");
+            print("  PlotReMsg .. R- PlotRe Message");
+            print("  PlotRePrf .. -W PlotRe Printf Class <0,1>");
             print("  PlotAdd     .. -W Add Wave Data <float>");
             print("  PlotReEn    .. -W Re Plot Wave En (0close)<0,1>");
             print("  PlotReL     .. -W Re Lift  String");
@@ -173,23 +173,23 @@ class cPlotWave(object):
             print("  PlotReV     .. -W Re Val Type 0Dec 1Hex <0,1>");
             return True;
 
-        if(cmdlist[0] == 'plotwavemsg'):
-            self.sPlotWaveMsg();
+        if(cmdlist[0] == 'plotremsg'):
+            self.sPlotReMsg();
             return True;
             
-        if(cmdlist[0] == 'plotwaveprf'):
+        if(cmdlist[0] == 'plotreprf'):
             if(len(cmdlist) == 2):
                 if(cmdlist[1].isdigit() == False):#不是数字直接结束
                     return False;
-                self.sPlotWavePrf(int(cmdlist[1]));
-                print('PlotWavePrf <= {0}'.format(cmdlist[1]));
+                self.sPlotRePrf(int(cmdlist[1]));
+                print('PlotRePrf <= {0}'.format(cmdlist[1]));
                 return True;
             return False;
 
         if(cmdlist[0] == 'plotadd'):
             if(len(cmdlist) == 2):
                 if(isFloatType(cmdlist[1]) == True):
-                    self.sPlotWaveAdd(float(cmdlist[1]));
+                    self.sPlotReAdd(float(cmdlist[1]));
                     return True;
             return False;
             
@@ -204,7 +204,11 @@ class cPlotWave(object):
 
         # 设置正则表达式左边字符
         if(cmdlist[0] == 'plotrel'):
-            if(len(cmdlist) >= 2):
+            if(len(cmdlist) == 1):
+                self.sPlotReL('');
+                print('PlotReL <= \'\'');
+                return True;
+            elif(len(cmdlist) >= 2):
                 self.sPlotReL(incmd[len(cmdlist[0])+1:]);
                 print('PlotReL <= {0}'.format(incmd[len(cmdlist[0])+1:]));
                 return True;
@@ -212,7 +216,11 @@ class cPlotWave(object):
 
         # 设置正则表达式右边字符
         if(cmdlist[0] == 'plotrer'):
-            if(len(cmdlist) >= 2):
+            if(len(cmdlist) == 1):
+                self.sPlotReR('');
+                print('PlotReR <= \'\'');
+                return True;
+            elif(len(cmdlist) >= 2):
                 self.sPlotReR(incmd[len(cmdlist[0])+1:]);
                 print('PlotReR <= {0}'.format(incmd[len(cmdlist[0])+1:]));
                 return True;
@@ -230,14 +238,45 @@ class cPlotWave(object):
         return False;
 
 # 实例化类
-PlotWave = cPlotWave();
+PlotRe = cPlotRe();
 # 外调接口
-def PlotWaveCmd(incmd):
-    return PlotWave.sPlotWaveCmd(incmd);
+def PlotReCmd(incmd):
+    return PlotRe.sPlotReCmd(incmd);
 
-def PrjF_10mS_Plot():
-    PlotWave.sPrjF_10mS_Plot();
+def PrjF_10mS_PlotRe():
+    PlotRe.sPrjF_10mS_PlotRe();
 
-def PrjB_10mS_Plot():
-    PlotWave.sPrjB_10mS_Plot();
+def PrjB_10mS_PlotRe():
+    PlotRe.sPrjB_10mS_PlotRe();
+
+########################### Test PlotRe.py
+if __name__ == '__main__':
+
+    #初始化参数
+    InCmd = ".PlotRe"
+    print("In Key [exit] Exit Debug!");
+
+    #进入调试循环
+    while True:
+        InKey = input();
+
+        #模拟定时任务处理
+        PrjF_10mS_PlotRe();
+        PrjB_10mS_PlotRe();
+
+        #退出模块调试命令
+        if(InKey == 'exit'):
+            break;
+
+        if(len(InKey.split()) != 0):#回车重复执行上次
+            InCmd = InKey;
+        else:
+            print(InCmd);
+            
+        if(len(InCmd.split()) != 0):#保证输入空格不闪退
+            if(PlotReCmd(InCmd) == False):
+                if(InCmd.lower() != 'help'):
+                    print("unknown Cmd");
+
+        print("InCmd>>>",end="");
 
