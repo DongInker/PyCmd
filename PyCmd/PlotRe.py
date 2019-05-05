@@ -163,8 +163,8 @@ class cPlotRe(object):
 
         if(cmdlist[0] == '.plotre'):
            #print("------------- .. RW ------------");
-            print("  PlotReMsg .. R- PlotRe Message");
-            print("  PlotRePrf .. -W PlotRe Printf Class <0,1>");
+            print("  PlotReMsg   .. R- PlotRe Message");
+            print("  PlotRePrf   .. -W PlotRe Printf Class <0,1>");
             print("  PlotAdd     .. -W Add Wave Data <float>");
             print("  PlotReEn    .. -W Re Plot Wave En (0close)<0,1>");
             print("  PlotReL     .. -W Re Lift  String");

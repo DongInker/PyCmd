@@ -344,7 +344,7 @@ def cb(xmitlen, buflen, pbuf, flen):
     if(flen):
         a = round(20*xmitlen/flen);
         b = 20-a;
-        print('%3dkB %3dkB |%s%s| %d%%'%(flen/1024,xmitlen/1024,a*'▇',b*'  ',(xmitlen/flen)*100),end='\r')
+        print('\r%3dkB %3dkB |%s%s| %d%%            '%(flen/1024,xmitlen/1024,a*'▇',b*'  ',(xmitlen/flen)*100),end='\r')
     return xmitlen
 
 CALLBACK = WINFUNCTYPE(c_int, c_long, c_int, POINTER(c_char), c_long)
