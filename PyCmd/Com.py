@@ -6,6 +6,7 @@ import time
 from Log import Log;
 
 ComBrtTab = {
+"300"   :0X05, # #1000000_ #1500000_ #2000000_
 "1200"  :0X07,
 "2400"  :0X09,
 "4800"  :0X0A,
@@ -13,7 +14,10 @@ ComBrtTab = {
 "19200" :0X0D,
 "38400" :0X0E,
 "57600" :0X0F,
-"115200":0X10};
+"115200":0X10,
+"230400":0X11,
+"460800":0X12,
+"921600":0X13};
 
 class cCom(object):
     def __init__(self,prf=0,com=6):
@@ -137,12 +141,16 @@ class cCom(object):
     
     def SetComBaudrate(self,baudrate):
         if baudrate in ComBrtTab:
+            self.BaudRate = baudrate;
+            self.sComSetCfg();
             ret = self.ComDll.sio_baud(self.ComNum, int(baudrate));
             if(ret != 0):
                 print("Set <Com%d> Baudrate Error %d!"%(self.ComNum,ret));
                 return False;
-            self.BaudRate = baudrate;
-            self.sComSetCfg();
+            if(int(baudrate) == 300):
+                #ComSend('#2000000_',0)
+                ComSend('#1500000_',0)
+                 
             return True;
         else:
             for dict_key, dict_value in ComBrtTab.items():  
