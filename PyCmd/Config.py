@@ -30,11 +30,13 @@ class cConfig(object):
             
     def sConfigGet(self,Section,Option,DefaultVal):
         StoreFloag = 1;
-        if(self.config.has_section(Section) == False):#如果不存 则添加组
+        #如果不存 则添加组
+        if(self.config.has_section(Section) == False):
             self.config.add_section(Section); # Add Section
             StoreFloag = 1;
 
-        if(self.config.has_option(Section,Option) == False):# 如不存在 则添加并下载默认值
+        # 如不存在 则添加并设置为默认值
+        if(self.config.has_option(Section,Option) == False):
             self.config.set(Section,Option,DefaultVal);
             StoreFloag = 1;
 
@@ -45,8 +47,11 @@ class cConfig(object):
         return self.config[Section][Option];
         
     def sConfigSet(self,Section,Option,Val):
-        self.config.set(Section,Option,Val);
-        self.config.write(open(self.filepath, 'w'));
+        #判断值改变 写入文件
+        if(Val != self.config[Section][Option]):
+            self.config.set(Section,Option,Val);
+            self.config.write(open(self.filepath, 'w'));
+            #print("Wite Config File!")
         
     def sConfigCmd(self,incmd):
         # 空格进行切割

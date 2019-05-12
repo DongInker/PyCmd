@@ -10,42 +10,40 @@ class cUfd(object):
     def __init__(self,prf=0):
 
         # 调用外部包 模块
-        import sys
-        import serial;
         from Com import ComSend,ComYmodemTx;
 
         # 连接内部
-        self.PrfDis     = sys.stdout.flush;# 强制打印缓存数据
-        self.Serial     = serial.Serial;
         self.UfdTxdFunc = ComSend;
         self.UfdIapFunc = ComYmodemTx;
         
-        self.PrfClass  = prf;
         self.UfdModeEn = 0;
 
-        self.BtnTxtLines = 0;
-        self.BtnTxdFlag  = 0;
-        #self.UfdFrm = 0;
+        #读取配置参数
+        from Config import GetConfig,SetConfig;
+        self.SetConfig = SetConfig;
+        self.CfgPrfClass = int(GetConfig('Ufd', 'PrfClass', '0'));
+        self.CfgGroPos   = int(GetConfig('Ufd', 'GrousPos', '0'));
+        self.CfgCmdPos   = int(GetConfig('Ufd', 'CmdPos',   '0'));
 
-        #Cmd
-        self.CmdPrj  = [];
-        self.CmdNum  = [];
-        self.CmdBuf  = [];
-        self.CmdName = [];
-        self.PrjPos  = 0;
-        self.CmdPos  = 0;
-        self.PrjCmd  = [];
-        
+    def sUfdSetCfg(self):
+        self.SetConfig('Ufd', 'PrfClass', str(self.CfgPrfClass));
+        self.SetConfig('Ufd', 'GrousPos', str(self.CfgGroPos));
+        self.SetConfig('Ufd', 'CmdPos',   str(self.CfgCmdPos));
+
     def sUfdMsg(self):
-        print("PrfClass:%d"%(self.PrfClass));
+        print("CfgPrfClass:%d"%(self.CfgPrfClass));
+        print("CfgGroPos  :%d"%(self.CfgGroPos));
+        print("CfgCmdPos  :%d"%(self.CfgCmdPos));
         
     def sUfdPrf(self,PrfClass):
-        self.PrfClass = PrfClass;
+        self.CfgPrfClass = PrfClass;
+        self.sUfdSetCfg();
 
     def sSetUfdModeEn(self,en):
         self.UfdModeEn = en;
         if(en):
             print('Go to Ufd Mode!');
+
     def sGetUfdModeEn(self,):
         return self.UfdModeEn;
         
@@ -67,20 +65,17 @@ class cUfd(object):
                 
     def sUfdBtnReadCfg(self):
         #读取文件数据
-        
         fpath = os.path.dirname(os.getcwd()) + "\\PyCmd\\ButtonBarV3.ini";
         with open(fpath,'r',encoding='utf-8') as f:
             lines = f.readlines();
-        #f=open(fpath,'r',encoding='utf-8');
-        #lines = f.readlines();
-        #f.close();
 
-        self.CmdPrj  = [];
-        self.CmdNum  = [];
-        self.CmdBuf  = [];
-        self.CmdName = [];
+        self.GrosName     = [];  # 产品组名称列表       [{组1名称},{组2名称},..]
+        self.GrosCmdNum   = [];  # 每组产品下命令个数   [{组1个数},{组2个数},..]
+        self.GrosCmdsMsg  = [];  # 命令内容             [{{组1命令1},{组1命令2},..},{{组2命令1},{组2命令2},..},..]
+        self.GrosCmdsName = [];  # 命令的名称           [{{组1命令名1},{组1命令名2},..},{{组2命令名1},{组2命令名2},..},..]
+        self.CmdPos       = 0;   # 命令位置临时变量
 
-        num = 0;
+        CmdCnt = 0;
         for data in lines:
             pos = self.sindex_of_str(data,'Z:\"');
             if(pos == None):
@@ -89,9 +84,9 @@ class cUfd(object):
                 pattern = re.compile(r"Z:\"(\S+)\"=([0-9a-fA-F]\w*)");
                 match = pattern.match(data);
                 if match:
-                    self.CmdPrj.append(match.group(1));
-                    self.CmdNum.append(num);#存上一组命令个数
-                    num = 0;
+                    self.GrosName.append(match.group(1));
+                    self.GrosCmdNum.append(CmdCnt);#存上一组命令个数
+                    CmdCnt = 0;
                     #print(match.group(1),int(match.group(2), 16))
 
             if(pos == -1):
@@ -99,64 +94,60 @@ class cUfd(object):
                 pattern = re.compile(" SEND,([\s\S]*?),(\S+),,,");
                 match = pattern.match(data);
                 if match:
-                    num += 1;
+                    CmdCnt += 1;
                     cmdbuf = match.group(1);
                     cmdbuf = cmdbuf.replace("\\r\\n","\r\n");# 将 \\ 替换为 \
                     cmdbuf = cmdbuf.replace("\\\\","\\");# 将 \\ 替换为 \
-                    self.CmdBuf.append(cmdbuf);
-                    self.CmdName.append(match.group(2));
-        self.CmdNum.append(num);#最后一组
+                    self.GrosCmdsMsg.append(cmdbuf);
+                    self.GrosCmdsName.append(match.group(2));
+
+        self.GrosCmdNum.append(CmdCnt);#最后一组
+        self.GrosCmdNum = self.GrosCmdNum[1:];#删除未使用的第1个
         
-    def sUfdButtonCfg(self):
-        try:
-            with open(os.getcwd()+"\\ButtonBarV3.ini",'r',encoding='utf-8') as f:
-                self.BtnTxtLines = '';
-                self.BtnTxtLines = f.readlines();           
-            #f=open(os.getcwd()+"\\ButtonBarV3.ini",'r',encoding='utf-8');
-            #self.BtnTxtLines = '';
-            #self.BtnTxtLines = f.readlines();
-            #f.close();
-            
-            self.BtnTxdFlag = 1;
-            print(self.BtnTxtLines[0],end='');
-            print(self.BtnTxtLines[1],end='');
-            print(self.BtnTxtLines[2],end='');
-            print(self.BtnTxtLines[3],end='');
-            print(self.BtnTxtLines[4],end='');
-            print(self.BtnTxtLines[5],end='');
-        except Exception as e:
-            Log.logger.error(e);
-            
     def sGroupLstBoxMsg(self,event):
         print(self.GroupLstBox.get());
         print(self.GroupLstBox.current());
 
-        self.PrjPos  = self.GroupLstBox.current();
-        self.CmdPos  = sum(self.CmdNum[0:self.PrjPos+1]);
+        GroupPos    = self.GroupLstBox.current();
+        self.CmdPos = sum(self.GrosCmdNum[0:GroupPos]);
         
-        self.PrjCmd  = self.CmdName[self.CmdPos:self.CmdPos+self.CmdNum[self.PrjPos+1]];
-        self.CmdNameLstBox["values"] = self.PrjCmd;
-        self.CmdNameLstBox.current(0);
+        # 获取当前组下所以命令名称列表  {{组n命令名1},{组n命令名2},..}
+        GroCmdsName  = self.GrosCmdsName[self.CmdPos:self.CmdPos+self.GrosCmdNum[GroupPos]];
+        self.CmdNameLstBox["values"] = GroCmdsName;
+
+        # 显示选择的命令名称
+        if(GroupPos != self.CfgGroPos):
+            self.CmdNameLstBox.current(0);
+        else:
+            self.CmdNameLstBox.current(self.CfgCmdPos);
         
-        self.cmdscr.delete(1.0, END) # 使用 delete
-        self.cmdscr.insert(END,self.CmdBuf[self.CmdPos+self.CmdNameLstBox.current()]);
+        # 显示选择的命令内容
+        #清除窗口数据
+        self.cmdscr.delete(1.0, END);
+        #写入窗口数据
+        self.cmdscr.insert(END,self.GrosCmdsMsg[self.CmdPos+self.CmdNameLstBox.current()]);
         return 0;
 
     def sCmdNameLstBoxMsg(self,event):
-        self.cmdscr.delete(1.0, END) # 使用 delete
-        self.cmdscr.insert(END,self.CmdBuf[self.CmdPos+self.CmdNameLstBox.current()]);
+        #清除窗口数据
+        self.cmdscr.delete(1.0, END);
+        #写入窗口数据
+        self.cmdscr.insert(END,self.GrosCmdsMsg[self.CmdPos+self.CmdNameLstBox.current()]);
         return 0;
         
     def sUfdBtnSend(self):
-        #print("sUfdBtnSend");
-        #print(self.cmdscr.get("0.0", "end"));
-        #self.cmdscr.delete(1.0, END) # 使用 delete 全部
-        #self.cmdscr.insert(END,self.CmdBuf[self.CmdPos+self.CmdNameLstBox.current()]);
-        
+
+        # 当按下发送事件 获取组,命令位置进行保存
+        self.CfgGroPos  = self.GroupLstBox.current();
+        self.CfgCmdPos  = self.CmdNameLstBox.current();
+        self.sUfdSetCfg();
+
         #覆盖之前命令值
-        #self.CmdBuf[self.CmdPos+self.CmdNameLstBox.current()] = self.cmdscr.get("0.0", "end").strip();
-        self.CmdBuf[self.CmdPos+self.CmdNameLstBox.current()] = self.cmdscr.get("0.0", "end");
-        sendstr = self.CmdBuf[self.CmdPos+self.CmdNameLstBox.current()];
+        #self.GrosCmdsMsg[self.CmdPos+self.CmdNameLstBox.current()] = self.cmdscr.get("0.0", "end");
+
+        #获取命令内容进行发送 临时修改命令会发送 但不存储
+        #sendstr = self.GrosCmdsMsg[self.CmdPos+self.CmdNameLstBox.current()];
+        sendstr = self.cmdscr.get("0.0", "end");
         sendstr = sendstr.replace("\r\n","");# 将 \r\n 替换为 空
         sendstr = sendstr.replace("\\r\\n","\r");# 将 \\r\\n 替换为 \r
         sendstr = sendstr.replace("\\r","\r");# 将 \\r 替换为 \r
@@ -167,13 +158,14 @@ class cUfd(object):
         root = Tk();
         #root.wm_attributes('-topmost',1);#窗口顶层显示
         #root.geometry('250x150');
+
         root.title('UfdGui');
 
         self.UfdFrm = Frame(root);
         self.UfdFrm.pack();
 
+        # 载入文件数据
         self.sUfdBtnReadCfg();
-        
         
         #窗体对象.bind(事件类型，回调函数)
         #<Button-1>:左键单击
@@ -183,29 +175,30 @@ class cUfd(object):
         #<Control-V>:CTL 和V键被同时按下，V可以换成其它键位
         #<F1>：按下F1,fn系列可以随意换
 
-        # 滚动文本框
+        # 滚动文本框 命令内容
         scrolW = 36 # 设置文本框的长度
         scrolH = 6 # 设置文本框的高度
         self.cmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=scrolW, height=scrolH);
         self.cmdscr.grid(row = 2,rowspan=3,column=0, columnspan=3);# columnspan 个人理解是将3列合并成一列
         #self.cmdscr.insert(END,"prjprf 1\\r\r\nad7606prf 1\\r\r\nautogainprf 1\\r");
         
-        # Button
+        # Button 发送按键
         self.BtnSend = Button(self.UfdFrm,text = "发送",width=8,command = self.sUfdBtnSend);
         self.BtnSend.grid(row = 1,rowspan=1,column=2,sticky = E);
         #self.Btn1.grid_forget();#隐藏窗口
         
-        #CmdNameLst
+        #CmdNameLst 命令列表
         self.CmdNameLstBox = ttk.Combobox(self.UfdFrm,width=14);
         self.CmdNameLstBox.grid( row=1,column=1);
         #self.CmdNameLstBox.current(0);
         self.CmdNameLstBox.bind("<<ComboboxSelected>>",self.sCmdNameLstBoxMsg);
         
-        #GroupLst
-        self.GroupLstBox = ttk.Combobox(self.UfdFrm,width=10,values=self.CmdPrj);
+        #GroupLst 产品组列表
+        self.GroupLstBox = ttk.Combobox(self.UfdFrm,width=10,values=self.GrosName);
         self.GroupLstBox.grid( row=1,column=0);
-        self.GroupLstBox.current(0);
+        self.GroupLstBox.current(self.CfgGroPos);
         self.GroupLstBox.bind("<<ComboboxSelected>>",self.sGroupLstBoxMsg);
+
         self.sGroupLstBoxMsg(0);
 
         root.mainloop();
@@ -261,12 +254,12 @@ class cUfd(object):
             self.sUfdIap(0);
             return True;    
 
+        # 已经进入ymodem模式使用升级程序
         if(cmdlist[0] == 'ufdiapc'):
             self.sUfdIap(1);
             return True;    
 
         if(cmdlist[0] == 'ufdgui'):
-            #self.sUfdButtonCfg();
             self.sUfdGui();
             return True;
             
@@ -286,4 +279,33 @@ def UfdSetMode(en):
     
 def UfdTxd(data,Enter=1):
     Ufd.sUfdSendData(data,Enter);
+
+########################### Test Ufd.py
+if __name__ == '__main__':
+
+    #初始化参数
+    InCmd = ".Ufd"
+    print("In Key [exit] Exit Debug!");
+
+    #进入调试循环
+    while True:
+        InKey = input();
+
+        #模拟定时任务处理
+
+        #退出模块调试命令
+        if(InKey == 'exit'):
+            break;
+
+        if(len(InKey.split()) != 0):#回车重复执行上次
+            InCmd = InKey;
+        else:
+            print(InCmd);
+            
+        if(len(InCmd.split()) != 0):#保证输入空格不闪退
+            if(UfdCmd(InCmd) == False):
+                if(InCmd.lower() != 'help'):
+                    print("unknown Cmd");
+
+        print("InCmd>>>",end="");
 

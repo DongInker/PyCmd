@@ -13,20 +13,20 @@ class cDemo(object):
         #读取配置参数
         from Config import GetConfig,SetConfig;
         self.SetConfig = SetConfig;
-        self.PrfClass = int(GetConfig('Demo', 'PrfClass', '0'));
+        self.CfgPrfClass = int(GetConfig('Demo', 'PrfClass', '0'));
 
     def sDemoSetCfg(self):
-        self.SetConfig('Demo', 'PrfClass', str(self.PrfClass));
+        self.SetConfig('Demo', 'PrfClass', str(self.CfgPrfClass));
         
     def sDemoMsg(self):
         print("LastEdit:2019/04/24");
-        print("PrfClass:%d"%(self.PrfClass));
+        print("CfgPrfClass :%d"%(self.CfgPrfClass));
         print("PrjFCnt10mS :%d"%(self.PrjFCnt10mS));
         print("PrjBCnt10mS :%d"%(self.PrjBCnt10mS));
         print("PrjF - PrjB =%d"%(self.PrjFCnt10mS-self.PrjBCnt10mS));
         
     def sDemoPrf(self,PrfClass):
-        self.PrfClass = PrfClass;
+        self.CfgPrfClass = PrfClass;
         self.sDemoSetCfg();
         
     def sPrjF_10mS_Demo(self):

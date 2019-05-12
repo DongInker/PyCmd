@@ -9,6 +9,20 @@ from format    import isFloatType;
 from Log import Log;
 from Com import ComSaveFile;
 
+'''
+# 特殊字符需要前面加\  . ^ $ * + ? { } [ ] \ | ( )
+# | 多个表达式或关系
+# ^ 开始 $ 结束
+# ? 匹配一次或零次
+# + 匹配一次或多次
+# * 匹配零次或多次
+# \d* 匹配零次或多次数字
+# \w* 匹配零次或多次数字大小字母[A-Za-z0-9_]
+# \.? 匹配一次或零次小数点
+# x.x | .x | x.
+'''
+
+#buf = re.sub('\r\n', '',buf); #删除字符串buf \r\n
 class cPlotRe(object):
     def __init__(self):
     
