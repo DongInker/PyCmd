@@ -17,6 +17,7 @@ class cUfd(object):
         self.UfdIapFunc = ComYmodemTx;
         
         self.UfdModeEn = 0;
+        self.root      = 0;
 
         #读取配置参数
         from Config import GetConfig,SetConfig;
@@ -24,16 +25,25 @@ class cUfd(object):
         self.CfgPrfClass = int(GetConfig('Ufd', 'PrfClass', '0'));
         self.CfgGroPos   = int(GetConfig('Ufd', 'GrousPos', '0'));
         self.CfgCmdPos   = int(GetConfig('Ufd', 'CmdPos',   '0'));
+        self.CfgK2Cmd    = GetConfig('Ufd', 'K2Cmd',    ' ');
+        self.CfgK3Cmd    = GetConfig('Ufd', 'K3Cmd',    ' ');
+        self.CfgK4Cmd    = GetConfig('Ufd', 'K4Cmd',    ' ');
 
     def sUfdSetCfg(self):
         self.SetConfig('Ufd', 'PrfClass', str(self.CfgPrfClass));
         self.SetConfig('Ufd', 'GrousPos', str(self.CfgGroPos));
         self.SetConfig('Ufd', 'CmdPos',   str(self.CfgCmdPos));
+        self.SetConfig('Ufd', 'K2Cmd',    self.CfgK2Cmd);
+        self.SetConfig('Ufd', 'K3Cmd',    self.CfgK3Cmd);
+        self.SetConfig('Ufd', 'K4Cmd',    self.CfgK4Cmd);
 
     def sUfdMsg(self):
         print("CfgPrfClass:%d"%(self.CfgPrfClass));
         print("CfgGroPos  :%d"%(self.CfgGroPos));
         print("CfgCmdPos  :%d"%(self.CfgCmdPos));
+        print("K2Cmd      :%s"%(self.CfgK2Cmd));
+        print("K3Cmd      :%s"%(self.CfgK3Cmd));
+        print("K4Cmd      :%s"%(self.CfgK4Cmd));
         
     def sUfdPrf(self,PrfClass):
         self.CfgPrfClass = PrfClass;
@@ -135,6 +145,30 @@ class cUfd(object):
         self.cmdscr.insert(END,self.GrosCmdsMsg[self.CmdPos+self.CmdNameLstBox.current()]);
         return 0;
         
+    def sUfdKeyEvent(self,event):
+        # 按键分配事件
+        #print(event.keysym);
+        if(event.keysym == "F1"):  # F1 发送当前命令
+            print(event.keysym);
+            self.sUfdBtnSend();
+
+        if(event.keysym == "F2"):  # F2 发送当前命令
+            print(event.keysym);
+            self.sUfdK2BtnSend();
+
+        if(event.keysym == "F3"):  # F3 发送当前命令
+            print(event.keysym);
+            self.sUfdK3BtnSend();
+
+        if(event.keysym == "F4"):  # F4 发送当前命令
+            print(event.keysym);
+            self.sUfdK4BtnSend();
+
+        if(event.keysym == "Escape"): # Esc 退出窗口
+            print(event.keysym);
+            self.root.destroy();
+            self.root.quit();
+
     def sUfdBtnSend(self):
 
         # 当按下发送事件 获取组,命令位置进行保存
@@ -153,20 +187,47 @@ class cUfd(object):
         sendstr = sendstr.replace("\\r","\r");# 将 \\r 替换为 \r
         self.sUfdSendData(sendstr,0);
         
+    def sUfdK2BtnSend(self):
+        self.CfgK2Cmd = self.K2cmdscr.get("0.0", "end");
+        self.CfgK2Cmd = self.CfgK2Cmd.replace("\n\n","\n");#执行上一句读取 会多一个\n ???
+        self.sUfdSetCfg();
+        sendstr = self.CfgK2Cmd;
+        sendstr = sendstr.replace("\r\n","");# 将 \r\n 替换为 空
+        sendstr = sendstr.replace("\\r\\n","\r");# 将 \\r\\n 替换为 \r
+        sendstr = sendstr.replace("\\r","\r");# 将 \\r 替换为 \r
+        self.sUfdSendData(sendstr,0);
+
+    def sUfdK3BtnSend(self):
+        self.CfgK3Cmd = self.K3cmdscr.get("0.0", "end");
+        self.CfgK3Cmd = self.CfgK3Cmd.replace("\n\n","\n");#执行上一句读取 会多一个\n ???
+        self.sUfdSetCfg();
+        sendstr = self.CfgK3Cmd;
+        sendstr = sendstr.replace("\r\n","");# 将 \r\n 替换为 空
+        sendstr = sendstr.replace("\\r\\n","\r");# 将 \\r\\n 替换为 \r
+        sendstr = sendstr.replace("\\r","\r");# 将 \\r 替换为 \r
+        self.sUfdSendData(sendstr,0);
+
+    def sUfdK4BtnSend(self):
+        self.CfgK4Cmd = self.K4cmdscr.get("0.0", "end");
+        self.CfgK4Cmd = self.CfgK4Cmd.replace("\n\n","\n");#执行上一句读取 会多一个\n ???
+        self.sUfdSetCfg();
+        sendstr = self.CfgK4Cmd;
+        sendstr = sendstr.replace("\r\n","");# 将 \r\n 替换为 空
+        sendstr = sendstr.replace("\\r\\n","\r");# 将 \\r\\n 替换为 \r
+        sendstr = sendstr.replace("\\r","\r");# 将 \\r 替换为 \r
+        self.sUfdSendData(sendstr,0);
+
     def sUfdGui(self):
         
-        root = Tk();
-        #root.wm_attributes('-topmost',1);#窗口顶层显示
-        #root.geometry('250x150');
+        self.root = Tk();
+        #self.root.wm_attributes('-topmost',1);#窗口顶层显示
+        #self.root.geometry('250x150');
 
-        root.title('UfdGui');
+        self.root.title('按Esc退出窗口');
 
-        self.UfdFrm = Frame(root);
+        self.UfdFrm = Frame(self.root);
         self.UfdFrm.pack();
 
-        # 载入文件数据
-        self.sUfdBtnReadCfg();
-        
         #窗体对象.bind(事件类型，回调函数)
         #<Button-1>:左键单击
         #<Button-2>:中键单击
@@ -174,35 +235,62 @@ class cUfd(object):
         #<KeyPress-A>:A键被按下，其中的A可以换成其它键位
         #<Control-V>:CTL 和V键被同时按下，V可以换成其它键位
         #<F1>：按下F1,fn系列可以随意换
+        self.root.bind("<KeyPress> ",self.sUfdKeyEvent); #窗口获取按键事件 根据按键分配快捷键
+
+        # 载入文件数据
+        self.sUfdBtnReadCfg();
 
         # 滚动文本框 命令内容
-        scrolW = 36 # 设置文本框的长度
+        scrolW = 24 # 设置文本框的长度
         scrolH = 6 # 设置文本框的高度
         self.cmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=scrolW, height=scrolH);
-        self.cmdscr.grid(row = 2,rowspan=3,column=0, columnspan=3);# columnspan 个人理解是将3列合并成一列
+        self.cmdscr.grid(row = 2,rowspan=3,column=0, columnspan=2);# columnspan 个人理解是将3列合并成一列
         #self.cmdscr.insert(END,"prjprf 1\\r\r\nad7606prf 1\\r\r\nautogainprf 1\\r");
         
         # Button 发送按键
-        self.BtnSend = Button(self.UfdFrm,text = "发送",width=8,command = self.sUfdBtnSend);
-        self.BtnSend.grid(row = 1,rowspan=1,column=2,sticky = E);
+        self.BtnSend = Button(self.UfdFrm,text = "按F1发送",width=10,command = self.sUfdBtnSend);
+        self.BtnSend.grid(row = 3,rowspan=1,column=2,sticky = E);
         #self.Btn1.grid_forget();#隐藏窗口
         
         #CmdNameLst 命令列表
-        self.CmdNameLstBox = ttk.Combobox(self.UfdFrm,width=14);
-        self.CmdNameLstBox.grid( row=1,column=1);
+        self.CmdNameLstBox = ttk.Combobox(self.UfdFrm,width=20);
+        self.CmdNameLstBox.grid( row=1,column=1,columnspan=2);
         #self.CmdNameLstBox.current(0);
         self.CmdNameLstBox.bind("<<ComboboxSelected>>",self.sCmdNameLstBoxMsg);
         
         #GroupLst 产品组列表
-        self.GroupLstBox = ttk.Combobox(self.UfdFrm,width=10,values=self.GrosName);
+        self.GroupLstBox = ttk.Combobox(self.UfdFrm,width=12,values=self.GrosName);
         self.GroupLstBox.grid( row=1,column=0);
         self.GroupLstBox.current(self.CfgGroPos);
         self.GroupLstBox.bind("<<ComboboxSelected>>",self.sGroupLstBoxMsg);
 
+        # Button F2发送
+        self.K2cmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=24, height=1);
+        self.K2cmdscr.grid(row = 5,rowspan=1,column=0, columnspan=2);
+        self.K2cmdscr.insert(END,self.CfgK2Cmd);
+        self.K2BtnSend = Button(self.UfdFrm,text = "按F2发送",width=10,command = self.sUfdK2BtnSend);
+        self.K2BtnSend.grid(row = 5,rowspan=1,column=2,sticky = E);
+
+        # Button F3发送
+        self.K3cmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=24, height=1);
+        self.K3cmdscr.grid(row = 6,rowspan=1,column=0, columnspan=2);
+        self.K3cmdscr.insert(END,self.CfgK3Cmd);
+        self.K3BtnSend = Button(self.UfdFrm,text = "按F3发送",width=10,command = self.sUfdK3BtnSend);
+        self.K3BtnSend.grid(row = 6,rowspan=1,column=2,sticky = E);
+
+        # Button F4发送
+        self.K4cmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=24, height=1);
+        self.K4cmdscr.grid(row = 7,rowspan=1,column=0, columnspan=2);
+        self.K4cmdscr.insert(END,self.CfgK4Cmd);
+        self.K4BtnSend = Button(self.UfdFrm,text = "按F4发送",width=10,command = self.sUfdK4BtnSend);
+        self.K4BtnSend.grid(row = 7,rowspan=1,column=2,sticky = E);
+
+
         self.sGroupLstBoxMsg(0);
 
-        root.mainloop();
-        #root.destroy();
+        self.root.mainloop();
+        #self.root.destroy();
+        print("****Exit UFD GUI!");
         
     #end Ufd Gui
     
