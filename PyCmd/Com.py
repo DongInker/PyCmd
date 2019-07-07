@@ -27,7 +27,7 @@ class cCom(object):
         
         
         # 连接内部
-        self.ComMsgFunc = serial.tools.list_ports.comports;#获取串口信息
+        self.ComMsgFunc = serial.tools.list_ports.comports;#获取串口列表信息
         self.ComDll     = windll.LoadLibrary("PCOMM.DLL");
         
         self.DataBit  = '8';      # 5 6 7 8

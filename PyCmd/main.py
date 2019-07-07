@@ -181,7 +181,7 @@ from Log       import LogCmd,Log;
 from Demo      import DemoCmd,PrjF_10mS_Demo,PrjB_10mS_Demo;
 from AutoTxd   import AutoTxdCmd,SetAutoTxdEn,PrjB_10mS_AutoTxd,isAutoTxdFlag,GetAutoTxdCmd;
 from Com       import ComCmd,PrjF_10mS_Com;
-from Ufd       import UfdCmd,isUfdMode,UfdSetMode,UfdTxd;
+from Ufd       import UfdCmd,PrjF_10mS_Ufd,isUfdMode,UfdSetMode,UfdTxd;
 from MbsRtu    import MbsRtuCmd,PrjB_10mS_MbsRtu;
 from format    import FormatCmd;
 from PlotRe    import PlotReCmd,PrjF_10mS_PlotRe,PrjB_10mS_PlotRe;
@@ -211,6 +211,7 @@ PrjB_10mS_MbsRtu];
 PrjF10mS_FuncLst = [
 PrjF_10mS_Com,
 PrjF_10mS_PlotRe,
+PrjF_10mS_Ufd,
 PrjF_10mS_Demo]; 
 
 ##########################################################
