@@ -31,6 +31,10 @@ class cUfd(object):
         self.CfgF2Cmd    = GetConfig('Ufd', 'F2Cmd',    ' ');
         self.CfgF3Cmd    = GetConfig('Ufd', 'F3Cmd',    ' ');
         self.CfgF4Cmd    = GetConfig('Ufd', 'F4Cmd',    ' ');
+        self.CfgF5Cmd    = GetConfig('Ufd', 'F5Cmd',    ' ');
+        self.CfgF6Cmd    = GetConfig('Ufd', 'F6Cmd',    ' ');
+        self.CfgF7Cmd    = GetConfig('Ufd', 'F7Cmd',    ' ');
+        self.CfgF8Cmd    = GetConfig('Ufd', 'F8Cmd',    ' ');
 
     def sUfdSetCfg(self):
         self.SetConfig('Ufd', 'PrfClass', str(self.CfgPrfClass));
@@ -39,6 +43,10 @@ class cUfd(object):
         self.SetConfig('Ufd', 'F2Cmd',    self.CfgF2Cmd);
         self.SetConfig('Ufd', 'F3Cmd',    self.CfgF3Cmd);
         self.SetConfig('Ufd', 'F4Cmd',    self.CfgF4Cmd);
+        self.SetConfig('Ufd', 'F5Cmd',    self.CfgF5Cmd);
+        self.SetConfig('Ufd', 'F6Cmd',    self.CfgF6Cmd);
+        self.SetConfig('Ufd', 'F7Cmd',    self.CfgF7Cmd);
+        self.SetConfig('Ufd', 'F8Cmd',    self.CfgF8Cmd);
 
     def sUfdMsg(self):
         print("CfgPrfClass:%d"%(self.CfgPrfClass));
@@ -47,6 +55,10 @@ class cUfd(object):
         print("F2Cmd      :%s"%(self.CfgF2Cmd));
         print("F3Cmd      :%s"%(self.CfgF3Cmd));
         print("F4Cmd      :%s"%(self.CfgF4Cmd));
+        print("F5Cmd      :%s"%(self.CfgF5Cmd));
+        print("F6Cmd      :%s"%(self.CfgF6Cmd));
+        print("F7Cmd      :%s"%(self.CfgF7Cmd));
+        print("F8Cmd      :%s"%(self.CfgF8Cmd));
         
     def sUfdPrf(self,PrfClass):
         self.CfgPrfClass = PrfClass;
@@ -163,10 +175,21 @@ class cUfd(object):
             self.sUfdF3BtnSend();
 
         if(event.keysym == "F4"):  # F4 发送当前命令
-            #self.sUfdF4BtnSend();
-            self.UfdIapFunc(0);
+            self.sUfdF4BtnSend();
 
         if(event.keysym == "F5"):  # F5 发送当前命令
+            self.sUfdF5BtnSend();
+
+        if(event.keysym == "F6"):  # F6 发送当前命令
+            self.sUfdF6BtnSend();
+
+        if(event.keysym == "F7"):  # F7 发送当前命令
+            self.sUfdF7BtnSend();
+
+        if(event.keysym == "F8"):  # F8 发送当前命令
+            self.sUfdF8BtnSend();
+
+        if(event.keysym == "F9"):  # F5 发送当前命令
             self.UfdIapFunc(0);
 
         if(str(self.root.focus_get()) == ".!frame.!frame2"):
@@ -212,6 +235,30 @@ class cUfd(object):
         self.CfgF4Cmd = self.F4CmdEntry.get();
         self.sUfdSetCfg();
         sendstr = self.CfgF4Cmd.replace("\\r","\r");
+        self.sUfdSendData(sendstr,0);
+
+    def sUfdF5BtnSend(self):
+        self.CfgF5Cmd = self.F5CmdEntry.get();
+        self.sUfdSetCfg();
+        sendstr = self.CfgF5Cmd.replace("\\r","\r");
+        self.sUfdSendData(sendstr,0);
+
+    def sUfdF6BtnSend(self):
+        self.CfgF6Cmd = self.F6CmdEntry.get();
+        self.sUfdSetCfg();
+        sendstr = self.CfgF6Cmd.replace("\\r","\r");
+        self.sUfdSendData(sendstr,0);
+
+    def sUfdF7BtnSend(self):
+        self.CfgF7Cmd = self.F7CmdEntry.get();
+        self.sUfdSetCfg();
+        sendstr = self.CfgF7Cmd.replace("\\r","\r");
+        self.sUfdSendData(sendstr,0);
+
+    def sUfdF8BtnSend(self):
+        self.CfgF8Cmd = self.F8CmdEntry.get();
+        self.sUfdSetCfg();
+        sendstr = self.CfgF8Cmd.replace("\\r","\r");
         self.sUfdSendData(sendstr,0);
 
     def sUfdGui(self):
@@ -282,9 +329,37 @@ class cUfd(object):
         self.F4BtnSend = Button(self.UfdFrm,text = "按F4发送",width=10,command = self.sUfdF4BtnSend);
         self.F4BtnSend.grid(row = 7,rowspan=1,column=2,sticky = E);
 
+        # Button F5发送
+        self.F5CmdEntry = ttk.Entry(self.UfdFrm, width=26);
+        self.F5CmdEntry.grid(row = 8,rowspan=1,column=0, columnspan=2);
+        self.F5CmdEntry.insert(END,self.CfgF5Cmd);
+        self.F5BtnSend = Button(self.UfdFrm,text = "按F5发送",width=10,command = self.sUfdF5BtnSend);
+        self.F5BtnSend.grid(row = 8,rowspan=1,column=2,sticky = E);
+
+        # Button F6发送
+        self.F6CmdEntry = ttk.Entry(self.UfdFrm, width=26);
+        self.F6CmdEntry.grid(row = 9,rowspan=1,column=0, columnspan=2);
+        self.F6CmdEntry.insert(END,self.CfgF6Cmd);
+        self.F6BtnSend = Button(self.UfdFrm,text = "按F6发送",width=10,command = self.sUfdF6BtnSend);
+        self.F6BtnSend.grid(row = 9,rowspan=1,column=2,sticky = E);
+
+        # Button F7发送
+        self.F7CmdEntry = ttk.Entry(self.UfdFrm, width=26);
+        self.F7CmdEntry.grid(row =10,rowspan=1,column=0, columnspan=2);
+        self.F7CmdEntry.insert(END,self.CfgF7Cmd);
+        self.F7BtnSend = Button(self.UfdFrm,text = "按F7发送",width=10,command = self.sUfdF7BtnSend);
+        self.F7BtnSend.grid(row =10,rowspan=1,column=2,sticky = E);
+
+        # Button F8发送
+        self.F8CmdEntry = ttk.Entry(self.UfdFrm, width=26);
+        self.F8CmdEntry.grid(row =11,rowspan=1,column=0, columnspan=2);
+        self.F8CmdEntry.insert(END,self.CfgF8Cmd);
+        self.F8BtnSend = Button(self.UfdFrm,text = "按F8发送",width=10,command = self.sUfdF8BtnSend);
+        self.F8BtnSend.grid(row =11,rowspan=1,column=2,sticky = E);
+
         # Key Cmd
-        self.Keycmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=48,height=14);
-        self.Keycmdscr.grid(row = 0,rowspan=8,column=4, columnspan=10);
+        self.Keycmdscr = scrolledtext.ScrolledText(self.UfdFrm,width=48,height=22);
+        self.Keycmdscr.grid(row = 0,rowspan=16,column=4, columnspan=10);
         self.Keycmdscr.focus();#指定默认光标在指定控件上
 
         self.sGroupLstBoxMsg(0);
