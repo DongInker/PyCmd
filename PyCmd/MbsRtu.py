@@ -7,6 +7,7 @@ import time
 import datetime
 import serial
 import struct
+from Com import ComSaveFile;
 
 '''
 struct.pack(fmt,v1,v2,.....)
@@ -65,6 +66,7 @@ class cMbsRtu(object):
         self.RxdModeFunc   = ComRxdMode;
         self.isRxdModeFunc = isComRxdMode;
         self.RxdBufFunc    = ComRxdBuf;
+        self.UnpackFmt     = ">BBB"; #Modbus协议解析格式
         
         self.AckCnt    = 0;
 
@@ -181,7 +183,15 @@ class cMbsRtu(object):
         if(self.isRxdModeFunc()==0):#应答成功
             self.AckCnt = 0;
             rxdbytes = self.RxdBufFunc();#获取串口接收数据
-            #print(struct.unpack(">BBHHH",rxdbytes));
+
+            try:
+                mbsunpack = struct.unpack(self.UnpackFmt,rxdbytes);
+                print(mbsunpack);
+                with open(ComSaveFile(),'a',encoding='utf-8') as f:
+                    f.write(str(mbsunpack)+'\r\n');
+            except Exception as e:
+                print(e);
+
             rxdstr   = [ord(i) for i in rxdbytes];#bytes数组转字符数据
             if(len(rxdstr)):
                 rxd = '[%s]-Rxd<<:'%(datetime.datetime.now().strftime('%H:%M:%S.%f'));
@@ -254,6 +264,7 @@ class cMbsRtu(object):
                     return False;
                 if(cmdlist[2].isdigit() == False):#不是数字直接结束
                     return False;
+                self.UnpackFmt = ">BBB" + int(cmdlist[2])*"H" + "H";
                 self.Mbs0x03(int(cmdlist[1]),int(cmdlist[2]));
                 return True;
             return False;
@@ -264,6 +275,7 @@ class cMbsRtu(object):
                     return False;
                 if(cmdlist[2].isdigit() == False):#不是数字直接结束
                     return False;  
+                self.UnpackFmt = ">BBHHH";
                 self.Mbs0x06(int(cmdlist[1]),int(cmdlist[2]));
                 return True;
             return False;
@@ -272,6 +284,7 @@ class cMbsRtu(object):
             if(len(cmdlist) == 2):#读浮点寄存器值
                 if(isUintType(cmdlist[1])  == False):
                     return False;
+                self.UnpackFmt = ">BBB" + "f" + "H";
                 data = struct.pack('>BBHH',self.SlaveID,0X03,int(cmdlist[1]),0X02);
                 self.MbsSend(data);
                 return True;
@@ -281,6 +294,7 @@ class cMbsRtu(object):
                     return False;
                 if(isFloatType(cmdlist[2]) == False):
                     return False;
+                self.UnpackFmt = ">BBHHH";
                 data = struct.pack('>BBHHBf',self.SlaveID,0X10,int(cmdlist[1]),2,4,float(cmdlist[2]));
                 self.MbsSend(data);
                 return True;

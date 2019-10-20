@@ -267,7 +267,7 @@ class cUfd(object):
         #self.root.wm_attributes('-topmost',1);#窗口顶层显示
         #self.root.geometry('250x150');
 
-        self.root.title('Esc退出窗口    F5升级');
+        self.root.title('Esc退出窗口    F9升级');
 
         self.UfdFrm = Frame(self.root);
         self.UfdFrm.pack();
