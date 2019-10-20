@@ -383,6 +383,8 @@ def ComYmodemTx(mode = 0):
         ComSend('inker'); # 登录口令
         time.sleep(0.5);
         ComSend('iap');   # 烧写命令
+        #发现单片机复位 发送管脚低电平 导致串口卡出错崩溃 复位串口卡 10MHz绕组变形板
+
         time.sleep(0.5);
         ComSend('1',0);   # 选择烧写程序
         time.sleep(0.5);

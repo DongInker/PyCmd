@@ -150,6 +150,10 @@ class cPlotRe(object):
                 self.PlotReStr = ".*" + self.PlotReL + "([0X]?[0-9a-fA-F]\w*)" + self.PlotReR;
                 iter = re.finditer(self.PlotReStr,data);
                 for i in iter:
+                    # 数据接收0X 0x 一半的数据最后字符为X x不处理
+                    if((i.group(1)[-1]=="x") | (i.group(1)[-1]=="X")):
+                        return False;
+
                     self.WaveBuf.append(int(i.group(1),16));
             else:
                 self.WaveBuf    = [];
