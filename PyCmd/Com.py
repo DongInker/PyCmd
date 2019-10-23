@@ -2,6 +2,7 @@
 import sys
 import os.path
 import time
+import serial
 
 from Log import Log;
 
@@ -20,7 +21,7 @@ ComBrtTab = {
 "921600":0X13};
 
 class cCom(object):
-    def __init__(self,prf=0,com=6):
+    def __init__(self,prf=0,com=3):
 
         # 调用外部包 模块
         import serial.tools.list_ports
@@ -28,14 +29,19 @@ class cCom(object):
         
         # 连接内部
         self.ComMsgFunc = serial.tools.list_ports.comports;#获取串口列表信息
-        self.ComDll     = windll.LoadLibrary("PCOMM.DLL");
-        
+
+        try:
+            self.ser        = serial.Serial("com0",115200);
+        except Exception as e:
+            print(e);
+
         self.DataBit  = '8';      # 5 6 7 8
         self.Parity   = 'None';   # None Even Odd Mark Space
         self.StopBit  = '1';      # 1 1.5 2
         self.isConnected = False;
         self.RxdMode  = 0; #0:str 1:Hex
         self.RxdBuf   = 0;
+
 
         self.RxdHalfBuf   = '';#接受一半数据缓存
         self.RxdHalfFlag  = 0; #接受一半数据标记
@@ -98,39 +104,27 @@ class cCom(object):
         if(self.isConnected == False):
             self.ComConnect();    
         if(self.isConnected == True):
-            #self.ComTxt.write(txd);
-            self.ComDll.sio_write(self.ComNum,txd,len(txd));
+            self.ser.write(txd);
         
     def ComConnect(self):
-        ret = self.ComDll.sio_open(self.ComNum);
-        if(ret != 0):
-            print("Open <Com%d> Error %d!"%(self.ComNum,ret));
+        self.isConnected = False;
+        try:
+            self.ser = serial.Serial("com"+str(self.ComNum),int(self.BaudRate));
+            self.isConnected = True;
+        except Exception as e:
+            print(e);
+            print("打开串口失败!");
+            self.ser.close();
 
-            #发现设置波特率后切换串口 返回-5 添加这句达到重启作用
-            self.ComDll.sio_close(self.ComNum);
-
-            self.isConnected = False;
-            return ret;
-
-        # 115200, 无校验，8位数据位，1位停止位
-        #ret = self.ComDll.sio_ioctl(self.ComNum, 16, 0x00 | 0x03 | 0x00);
-        ret = self.ComDll.sio_ioctl(self.ComNum, ComBrtTab[self.BaudRate], 0x00 | 0x03 | 0x00);
-        if(ret != 0):
-            print("Config <Com%d> Param Error %d!"%(self.ComNum,ret));
-            return 0;
-            
-        #self.ComDll.sio_cnt_irq(self.ComNum,RxdFunc, 1);
-        self.isConnected = True;
-        
     def ComDisconnent(self):
-        self.ComDll.sio_close(self.ComNum);
+        self.isConnected = False;
+        self.ser.close();
         self.RxdHalfFlag = 0;
         self.RxdHalfBuf  = '';
-        self.isConnected = False;
         
     def SetComNum(self,comnum):
         # 关闭旧串口
-        self.ComDisconnent(); # 开启self.ComDll.sio_cnt_irq(self.ComNum,RxdFunc, 1); 执行关闭程序异常
+        self.ComDisconnent();
         self.ComNum = comnum;
         # 打开新串口
         self.ComConnect();
@@ -142,15 +136,8 @@ class cCom(object):
     def SetComBaudrate(self,baudrate):
         if baudrate in ComBrtTab:
             self.BaudRate = baudrate;
+            self.ser.baudrate = int(self.BaudRate); 
             self.sComSetCfg();
-            ret = self.ComDll.sio_baud(self.ComNum, int(baudrate));
-            if(ret != 0):
-                print("Set <Com%d> Baudrate Error %d!"%(self.ComNum,ret));
-                return False;
-            if(int(baudrate) == 300):
-                #ComSend('#2000000_',0)
-                ComSend('#1500000_',0)
-                 
             return True;
         else:
             for dict_key, dict_value in ComBrtTab.items():  
@@ -161,6 +148,7 @@ class cCom(object):
         self.RxdMode = mode;
         if(mode == 1):
             self.RxdBuf  = '';
+
     def sGetRxdMode(self):
         return self.RxdMode;
 
@@ -170,21 +158,9 @@ class cCom(object):
     def sPrjF_10mS_Com(self):
         if(self.isConnected == False):
             return 0;
-        
-        status = self.ComDll.sio_data_status(self.ComNum);
-        if(status):
-            Log.logger.error("Com State Error:%X"%(status));
-            #print("******************%X"%(status));
-            self.ComDisconnent();
+        rxdbuf = self.ser.read(self.ser.in_waiting);
+        if(len(rxdbuf) <= 0):
             return 0;
-            
-        num = self.ComDll.sio_iqueue(self.ComNum);
-        if(num <= 0):
-            return 0;
-            
-        rxdbuf = create_string_buffer(num);
-        self.ComDll.sio_read(self.ComNum,rxdbuf, num);
-
         # 接收十六进制模式
         if(self.RxdMode == 1):
             self.RxdBuf = rxdbuf;
@@ -195,7 +171,8 @@ class cCom(object):
         attempts = 0;
         success  = False;
         DoneFlag = 0;
-        rxdval   = rxdbuf.value;
+        #rxdval   = rxdbuf.value;
+        rxdval   = rxdbuf;
         rxd      = rxdval;
         #while attempts < 3 and DoneFlag == 0:
         while DoneFlag == 0:    
@@ -241,10 +218,6 @@ class cCom(object):
             #except Exception as e:
             #    Log.logger.error(e);
 
-            #f=open(self.com_name,'a');
-            #f.write(rxdstr);
-            #f.close();
-            
     def sComSaveFile(self):
         return self.com_name;
         
@@ -308,6 +281,7 @@ class cCom(object):
 
         if(cmdlist[0] == 'comclose'):
             self.ComDisconnent();
+            print('Com{0} <= Close!'.format(self.ComNum));
             return True;
             
         if(cmdlist[0] == 'startcon'):
@@ -318,45 +292,6 @@ class cCom(object):
             return False;
             
         return False;
-
-##################################
-from ctypes import *
-import time
-
-def RxdComData(port=1):
-    time.sleep(0.01);# 时间不足会导致获取数据分段 导致解码出错
-    
-    num = Com.ComDll.sio_iqueue(Com.GetComNum());
-    rxdbuf = create_string_buffer(num);
-    Com.ComDll.sio_read(Com.GetComNum(),rxdbuf, num);
-    
-    if(Com.sGetRxdMode() == 1):
-        Com.RxdBuf = rxdbuf;
-        Com.sSetRxdMode(0);
-        return Com.GetComNum();
-        
-    rxd = rxdbuf.value;    
-    #rxd = rxd.decode('gb18030');
-    #rxd = rxd.decode('ascii');
-    #rxd = rxd.decode('gb2312');
-    rxd = rxd.decode('gbk');
-    sys.stdout.write(rxd);
-    sys.stdout.flush();
-    return Com.GetComNum();
-
-CALLBACK = WINFUNCTYPE(c_int);
-RxdFunc = CALLBACK(RxdComData);
-#########################
-def cb(xmitlen, buflen, pbuf, flen):
-    #print(xmitlen, flen,end='\r');
-    if(flen):
-        a = round(20*xmitlen/flen);
-        b = 20-a;
-        print('\r%3dkB %3dkB |%s%s| %d%%            '%(flen/1024,xmitlen/1024,a*'▇',b*'  ',(xmitlen/flen)*100),end='\r')
-    return xmitlen
-
-CALLBACK = WINFUNCTYPE(c_int, c_long, c_int, POINTER(c_char), c_long)
-ccb = CALLBACK(cb)
 
 #选择烧写文件
 import os
@@ -369,6 +304,22 @@ def BinPath():
     fpos = tkinter.filedialog.askopenfilename(title=u'Open File',initialdir=(os.path.expanduser((Com.BinPath))));
     return fpos;
 
+#####################
+def getc(size):
+    if(Com.ser.in_waiting != 0):#注意 发送数据后直接调用read函数会使发送数据偶尔出错 所以先判读再读
+        rxd = Com.ser.read(size);
+    else:
+        rxd = None;
+    return rxd;
+
+def putc(data):
+    return Com.ser.write(data);
+
+def callback(FileLen,TxdLen):
+    a = round(20*TxdLen/FileLen);
+    b = 20-a;
+    print('\r%3dkB %3dkB |%s%s| %d%%            '%(FileLen/1024,TxdLen/1024,a*'▇',b*'  ',(TxdLen/FileLen)*100),end='\r')
+
 def ComYmodemTx(mode = 0):
     fpos = BinPath();
     if(fpos==''):#取消选择文件 直接结束下载
@@ -378,9 +329,9 @@ def ComYmodemTx(mode = 0):
     Com.sComSetCfg(); # 存储文件路径
 
     if(mode == 0):
-        ComSend('inker'); # 回车
+        ComSend('ufd on'); # 回车
         time.sleep(0.5);
-        ComSend('inker'); # 登录口令
+        ComSend('ufd on'); # 登录口令
         time.sleep(0.5);
         ComSend('iap');   # 烧写命令
         #发现单片机复位 发送管脚低电平 导致串口卡出错崩溃 复位串口卡 10MHz绕组变形板
@@ -390,9 +341,14 @@ def ComYmodemTx(mode = 0):
         time.sleep(0.5);
         #ComSend('a',0);
         #ComSend('2',0);
-    
-    Com.ComDll.sio_FtYmodemTx(Com.GetComNum(),fpos.encode('ascii'), ccb, 27);
-    print();
+        print(Com.ser.read(Com.ser.in_waiting));
+
+    from TxdYmodem import YMODEM
+    Com.isConnected = False;#避免定时中断干扰下载过程
+    stream = open(fpos,'rb');
+    Ymodem = YMODEM(getc,putc);
+    Ymodem.send(stream, 3, callback);
+    Com.isConnected = True;
     
 #####################
 Com = cCom(prf=0,com=4);
@@ -426,7 +382,7 @@ def PrjF_10mS_Com():
     
 ########################### Test Com.py
 if __name__ == '__main__':
-    Com.SetComNum(6);
+    Com.SetComNum(7);
     Com.ComConnect();
     while True:
         inkey = input();
