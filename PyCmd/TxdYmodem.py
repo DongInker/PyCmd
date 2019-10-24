@@ -1,4 +1,39 @@
 # -*- coding: utf-8 -*-
+#
+# Original code by:
+#    Inker.Dong <dongmaowan99@163.com>
+#    Copyright 2019 Inker.Dong
+#
+# Subsequent changes:
+
+'''
+import serial
+from TxdYmodem import YMODEM
+
+def getc(size):
+    #注意 发送数据后直接调用read函数会使发送数据偶尔出错 所以先判读再读
+    if(ser.in_waiting != 0):
+        rxd = ser.read(size);
+    else:
+        rxd = None;
+    return rxd;
+
+def putc(data):
+    return ser.write(data);
+
+def callback(FileLen,TxdLen):
+    a = round(20*TxdLen/FileLen);
+    b = 20-a;
+    print('\r%3dkB %3dkB |%s%s| %d%%            '%(FileLen/1024,TxdLen/1024,a*'▇',b*'  ',(TxdLen/FileLen)*100),end='\r')
+
+stream = open('E:\\pytest\\test.txt','rb');
+ser = serial.Serial("com1",115200);
+Ymodem = YMODEM(getc,putc);
+Ymodem.send(stream, 3, callback);
+
+'''
+
+__version__ = "1.0.0"
 
 '''
 Rxd <<<  C

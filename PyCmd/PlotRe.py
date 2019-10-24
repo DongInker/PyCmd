@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+#
+# Original code by:
+#    Inker.Dong <dongmaowan99@163.com>
+#    Copyright 2019 Inker.Dong
+#
+# Subsequent changes:
 
 import re
 import os.path

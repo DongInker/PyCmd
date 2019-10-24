@@ -25,15 +25,9 @@ class cCom(object):
 
         # 调用外部包 模块
         import serial.tools.list_ports
-        
-        
         # 连接内部
         self.ComMsgFunc = serial.tools.list_ports.comports;#获取串口列表信息
-
-        try:
-            self.ser        = serial.Serial("com0",115200);
-        except Exception as e:
-            print(e);
+        self.ser        = serial.Serial;
 
         self.DataBit  = '8';      # 5 6 7 8
         self.Parity   = 'None';   # None Even Odd Mark Space
@@ -117,8 +111,9 @@ class cCom(object):
             self.ser.close();
 
     def ComDisconnent(self):
-        self.isConnected = False;
-        self.ser.close();
+        if(self.isConnected == True):
+            self.ser.close();
+            self.isConnected = False;
         self.RxdHalfFlag = 0;
         self.RxdHalfBuf  = '';
         
@@ -341,7 +336,7 @@ def ComYmodemTx(mode = 0):
         time.sleep(0.5);
         #ComSend('a',0);
         #ComSend('2',0);
-        print(Com.ser.read(Com.ser.in_waiting));
+        Com.ser.read(Com.ser.in_waiting);
 
     from TxdYmodem import YMODEM
     Com.isConnected = False;#避免定时中断干扰下载过程
