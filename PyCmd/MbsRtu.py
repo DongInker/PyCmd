@@ -17,26 +17,27 @@ from Com import ComSaveFile;
 '''
 struct.pack(fmt,v1,v2,.....)
 struct.unpack(fmt,string)     a1, a2 = struct.unpack("ii", str) 
-------------------------------
-|Format | c Type          | Python |
-|   x   | pad byte        | no value
-|   c   | char            | string of length 1
-|   b   | signedchar      | integer
-|   B   | unsignedchar    | integer
-|   ?   | _Bool           | bool
-|   h   | short           | integer
-|   H   | unsignedshort   | integer
-|   i   | int             | integer
-|   I   | unsignedint     | integer or long
-|   l   | long            | integer
-|   L   | unsignedlong    | long
-|   q   | longlong        | long
-|   Q   | unsignedlonglong| long
-|   f   | float           | float
-|   d   | double          | float
-|   s   | char[]          | string
-|   p   | char[]          | string
-|   P   | void*           | long
++-------+------+-----------------+--------------------
+|Format | Byte | c Type          | Python
+|   x   |  1   | pad byte        | no value
+|   c   |  1   | char            | string of length 1
+|   b   |  1   | signedchar      | integer
+|   B   |  1   | unsignedchar    | integer
+|   ?   |  1   | _Bool           | bool
+|   h   |  2   | short           | integer
+|   H   |  2   | unsignedshort   | integer
+|   i   |  4   | int             | integer
+|   I   |  4   | unsignedint     | integer or long
+|   l   |  4   | long            | integer
+|   L   |  4   | unsignedlong    | long
+|   q   |  8   | longlong        | long
+|   Q   |  8   | unsignedlonglong| long
+|   f   |  4   | float           | float
+|   d   |  8   | double          | float
+|   s   |  1   | char[]          | string
+|   p   |  1   | char[]          | string
+|   P   |  4   | void*           | long
++-------+------+-----------------+--------------------
 '''
 
 def swap_bytes(word_val):
