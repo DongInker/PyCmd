@@ -106,9 +106,9 @@ class cCom(object):
             self.ser = serial.Serial("com"+str(self.ComNum),int(self.BaudRate));
             self.isConnected = True;
         except Exception as e:
-            print(e);
-            print("打开串口失败!");
-            self.ser.close();
+            #print(e);
+            print("串口异常!");
+            #self.ser.close();
 
     def ComDisconnent(self):
         if(self.isConnected == True):
@@ -153,6 +153,15 @@ class cCom(object):
     def sPrjF_10mS_Com(self):
         if(self.isConnected == False):
             return 0;
+
+        try:#当usb重新拔插时 USB转串口必须重新连接
+            self.ser.in_waiting;
+        except Exception as e:
+            Log.logger.error(e);
+            self.ComDisconnent();
+            self.ComConnect();
+            return 0;
+
         rxdbuf = self.ser.read(self.ser.in_waiting);
         if(len(rxdbuf) <= 0):
             return 0;
