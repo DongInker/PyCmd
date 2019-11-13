@@ -3,6 +3,9 @@ import sys
 import os.path
 import time
 import serial
+import struct
+from pylab import plot,grid,pause,close,show
+
 
 from Log import Log;
 
@@ -48,6 +51,12 @@ class cCom(object):
         
         f=open(self.com_name,'a');
         f.close();
+
+        #创建串口接收二进制数据保存文件
+        self.BinFilePath = '';
+        self.BinFileLen  = 0; #二进制文件大小
+        self.BinByteSum  = 0; #接收字节数
+
             
         #读取配置参数
         from Config import GetConfig,SetConfig;
@@ -75,6 +84,8 @@ class cCom(object):
         print('Com Num :%d(%d)'%(self.ComNum,self.isConnected));
         print('Com Brt :%s'%(self.BaudRate));
         print('Com Cfg DataBit:%s Parity:%s StopBit:%s'%(self.DataBit,self.Parity,self.StopBit));
+        print('Com Mode :%d'%(self.RxdMode));
+        print('BinFileLen:%d BinByteSum:%d'%(self.BinFileLen,self.BinByteSum));
         
     def ComPrf(self,PrfClass):
         self.PrfClass = PrfClass;
@@ -150,6 +161,40 @@ class cCom(object):
     def sGetRxdBuf(self):
         return self.RxdBuf;
 
+    def sBinPlot(self):
+        chs = 0;
+        DataByteNum = 0;
+        ch1 = [];
+        ch2 = [];
+        ch3 = [];
+        with open(self.BinFilePath,'rb') as f:
+            f.seek(4,0);
+            rbyte = f.read(2);
+            chs,          = struct.unpack('<H',rbyte);
+            rbyte = f.read(4);
+            DataByteNum,  = struct.unpack('<L',rbyte);
+            fmt = '<'+'h'*(DataByteNum//2);
+            
+            if(chs >= 1):
+                rbyte = f.read(DataByteNum);
+                ch1 = struct.unpack(fmt,rbyte);
+                plot(ch1,'y');
+
+            if(chs >= 2):
+                rbyte = f.read(DataByteNum);
+                ch2 = struct.unpack(fmt,rbyte);
+                plot(ch2,'g');
+
+            if(chs >= 3):
+                rbyte = f.read(DataByteNum);
+                ch3 = struct.unpack(fmt,rbyte);
+                plot(ch3,'r');
+
+            grid(True);#显示网格
+            show();#关闭窗口继续运行
+            #pause(3);#画布停留活动时间
+            #close();#关闭窗口
+
     def sPrjF_10mS_Com(self):
         if(self.isConnected == False):
             return 0;
@@ -165,7 +210,8 @@ class cCom(object):
         rxdbuf = self.ser.read(self.ser.in_waiting);
         if(len(rxdbuf) <= 0):
             return 0;
-        # 接收十六进制模式
+            
+        # 接收十六进制模式Modbus
         if(self.RxdMode == 1):
             self.RxdBuf = rxdbuf;
             self.RxdMode = 0;
@@ -246,6 +292,7 @@ class cCom(object):
             #print("  ComParity    .. -W Set Com Parity   <None,Even,Odd>");
             #print("  ComStopBit   .. -W Set Com StopBit  <1,2>");
             print("  StartCon     .. -W Start Com Con <open,close>");
+            print("  BinFile      .. -W Rxd BinFile <chs> <St> <Et> [name]");
             return True;
 
         if(cmdlist[0] == 'commsg'):
@@ -295,6 +342,55 @@ class cCom(object):
                 return True;
             return False;
             
+        if(cmdlist[0] == 'binfile'):
+            if(len(cmdlist) == 4 or len(cmdlist) == 5):
+                rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
+                path = os.path.dirname(os.getcwd()) + '\\Logs\\';
+                if(len(cmdlist) == 5):
+                    self.BinFilePath = path+rq+'_'+cmdlist[4]+'.wfm';
+                else:
+                    self.BinFilePath = path + rq + '.wfm';
+                f=open(self.BinFilePath,'a');
+                f.close();
+                self.BinFileLen  = 20; #二进制文件大小
+                self.BinByteSum  = 0; #接收字节数
+                ComSend('');          #防止之前存储无效命令 导致读取数据失败
+                time.sleep(0.1);
+                ComSend('binfile'+' '+cmdlist[1]+' '+cmdlist[2]+' '+cmdlist[3]);
+                time.sleep(0.1);
+                self.isConnected = False;
+                OverTime = 0;
+                while(self.BinByteSum < self.BinFileLen):
+                    if(self.ser.in_waiting):
+                        OverTime = 0;
+                        rxdbuf = self.ser.read(self.ser.in_waiting);
+                        self.BinByteSum += len(rxdbuf);
+                        with open(self.BinFilePath,'ab+') as f:
+                            f.write(rxdbuf);
+                        print("\r%ld %ld"%(self.BinFileLen,self.BinByteSum),end='');
+                        if((self.BinFileLen == 20) & (self.BinByteSum > 4)):
+                            with open(self.BinFilePath,'rb') as f:
+                                rbyte = f.read(4);
+                                self.BinFileLen, = struct.unpack('<L',rbyte);
+                    time.sleep(0.001);
+                    OverTime += 1;
+                    if(OverTime >= 3000):
+                        break;
+                print();
+                self.isConnected = True;
+                if(self.BinByteSum >= self.BinFileLen):
+                    sys.stdout.write("BinFile Rxd Done!\r\n");
+                    ComSend('prjmsg');
+                else:
+                    sys.stdout.write("BinFile Rxd Over Time!\r\n");
+                sys.stdout.flush();
+                return True;
+            return False;
+
+        if(cmdlist[0] == 'binplot'):
+            self.sBinPlot();
+            return True;
+
         return False;
 
 #选择烧写文件
@@ -386,7 +482,7 @@ def PrjF_10mS_Com():
     
 ########################### Test Com.py
 if __name__ == '__main__':
-    Com.SetComNum(7);
+    Com.SetComNum('8');
     Com.ComConnect();
     while True:
         inkey = input();
