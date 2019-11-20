@@ -354,7 +354,7 @@ class cCom(object):
                 f.close();
                 self.BinFileLen  = 20; #二进制文件大小
                 self.BinByteSum  = 0; #接收字节数
-                ComSend('');          #防止之前存储无效命令 导致读取数据失败
+                ComSend('123');          #防止之前存储无效命令 导致读取数据失败
                 time.sleep(0.1);
                 ComSend('binfile'+' '+cmdlist[1]+' '+cmdlist[2]+' '+cmdlist[3]);
                 time.sleep(0.1);

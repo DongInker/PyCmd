@@ -182,13 +182,12 @@ class cMbsRtu(object):
 
             with open(self.mbs_name,'a') as f:
                 f.write(rxd+'\r\n');
-            #f=open(self.mbs_name,'a');
-            #f.write(rxd+'\r\n');
-            #f.close();
             
         if(self.isRxdModeFunc()==0):#应答成功
             self.AckCnt = 0;
             rxdbytes = self.RxdBufFunc();#获取串口接收数据
+            if(len(rxdbytes) == 0):
+                return 0;
 
             try:
                 mbsunpack = struct.unpack(self.UnpackFmt,rxdbytes);
@@ -198,18 +197,15 @@ class cMbsRtu(object):
             except Exception as e:
                 print(e);
 
-            rxdstr   = [ord(i) for i in rxdbytes];#bytes数组转字符数据
-            if(len(rxdstr)):
-                rxd = '[%s]-Rxd<<:'%(datetime.datetime.now().strftime('%H:%M:%S.%f'));
-                for i in rxdstr:
-                    rxd += '%02X '%(i);
-                print(rxd);
-                #写入 XXXXmbs.txt 文件
-                with open(self.mbs_name,'a') as f:
-                    f.write(rxd+'\r\n');
-                #f=open(self.mbs_name,'a');
-                #f.write(rxd+'\r\n');
-                #f.close();
+            rxdstr = struct.unpack('>'+'B'*len(rxdbytes),rxdbytes);
+            #rxdstr   = [ord(i) for i in rxdbytes];#py3.6可行 py3.7错误
+            rxd = '[%s]-Rxd<<:'%(datetime.datetime.now().strftime('%H:%M:%S.%f'));
+            for i in rxdstr:
+                rxd += '%02X '%(i);
+            print(rxd);
+            #写入 XXXXmbs.txt 文件
+            with open(self.mbs_name,'a') as f:
+                f.write(rxd+'\r\n');
                 
     def sMbsRtuCmd(self,incmd):
         # 空格进行切割
