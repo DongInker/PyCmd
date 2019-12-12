@@ -288,6 +288,7 @@ class cCom(object):
             print("  ComNum       .. -W Set Com Num <1~255>");
             print("  ComClose     .. -W Close Com");
             print("  ComBR        .. -W Set Com BaudRate <9600,115200>");
+            print("  ComOpenTxt   .. -W Open Com Txt File");
             #print("  ComDataBit   .. -W Set Com DataBit  <5,6,7,8>");
             #print("  ComParity    .. -W Set Com Parity   <None,Even,Odd>");
             #print("  ComStopBit   .. -W Set Com StopBit  <1,2>");
@@ -329,6 +330,11 @@ class cCom(object):
                     print('ComNum <= {0}'.format(cmdlist[1]));
                     return True;
             return False;
+
+        if(cmdlist[0] == 'comopentxt'):
+            import os
+            os.startfile(self.com_name)
+            return True;
 
         if(cmdlist[0] == 'comclose'):
             self.ComDisconnent();
