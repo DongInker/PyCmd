@@ -1,6 +1,6 @@
 
 import sys
-import os.path
+import os
 import time
 import serial
 import struct
@@ -161,7 +161,7 @@ class cCom(object):
     def sGetRxdBuf(self):
         return self.RxdBuf;
 
-    def sBinPlot(self):
+    def sPlotBin(self):
         chs = 0;
         DataByteNum = 0;
         ch1 = [];
@@ -350,6 +350,7 @@ class cCom(object):
             
         if(cmdlist[0] == 'binfile'):
             if(len(cmdlist) == 4 or len(cmdlist) == 5):
+                import os
                 rq = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
                 path = os.path.dirname(os.getcwd()) + '\\Logs\\';
                 if(len(cmdlist) == 5):
@@ -393,8 +394,8 @@ class cCom(object):
                 return True;
             return False;
 
-        if(cmdlist[0] == 'binplot'):
-            self.sBinPlot();
+        if(cmdlist[0] == 'plotbin'):
+            self.sPlotBin();
             return True;
 
         return False;
