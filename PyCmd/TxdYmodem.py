@@ -196,7 +196,7 @@ class YMODEM(object):
                 return False;
 
         # send data
-        stime = time.clock();
+        stime = time.monotonic();
         packet_size = 1024;
         sequence = 1;
         TxdLen = 0;
@@ -231,7 +231,7 @@ class YMODEM(object):
                     print("TimeOut STX Wait Rxd ACK")
                     return False;
 
-        etime = time.clock();
+        etime = time.monotonic();
         print("\nTime:%0.3fS %0.1fkB/S"%(etime-stime,TxdLen/(etime-stime)/1024));
         # Txd:EOT  Rxd:NAK
         self.putc(EOT)

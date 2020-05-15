@@ -86,6 +86,7 @@ class cCom(object):
         print('Com Cfg DataBit:%s Parity:%s StopBit:%s'%(self.DataBit,self.Parity,self.StopBit));
         print('Com Mode :%d'%(self.RxdMode));
         print('BinFileLen:%d BinByteSum:%d'%(self.BinFileLen,self.BinByteSum));
+        print('PlotBin');
         
     def ComPrf(self,PrfClass):
         self.PrfClass = PrfClass;
