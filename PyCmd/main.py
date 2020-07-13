@@ -118,6 +118,12 @@ class cKeyCmd(object):
         # 有按键输入终止自动命令
         SetAutoTxdEn(0);
         
+        if(self.RxdBuf == 'xxx'): #关闭当前串口
+            from Com import ComDisCon;
+            ComDisCon();
+            self.RxdBuf = '';
+            return 0;
+
         if(KeyVal != '\r'):
             if(isUfdMode()== 1):#UFD模式 直接发送按键值
                 UfdTxd(KeyVal,0);#将输入字符直接发送到UFD串口

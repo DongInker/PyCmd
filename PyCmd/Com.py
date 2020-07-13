@@ -461,6 +461,10 @@ def ComYmodemTx(mode = 0):
 #####################
 Com = cCom(prf=0,com=4);
 
+def ComDisCon():
+    Com.ComDisconnent();
+    print('Com{0} <= Close!'.format(Com.ComNum));
+
 def ComCmd(incmd):
     return Com.sComCmd(incmd);
 
