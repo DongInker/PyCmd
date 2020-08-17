@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+#
+# Original code by:
+#    Inker.Dong <dongmaowan99@163.com>
+#    Copyright 2020 Inker.Dong
+#
+# Subsequent changes:
+
+__version__ = "1.0.0"
 
 import sys
 import time

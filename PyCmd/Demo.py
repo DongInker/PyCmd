@@ -15,8 +15,8 @@ class cDemo(object):
 
         # 连接
 
-        self.PrjFCnt10mS = 0;
-        self.PrjBCnt10mS = 0;
+        self.PrjFCnt10mS  = 0;
+        self.PrjBCnt10mS  = 0;
 
         #读取配置参数
         from Config import GetConfig,SetConfig;
@@ -33,15 +33,21 @@ class cDemo(object):
         print("PrjBCnt10mS :%d"%(self.PrjBCnt10mS));
         print("PrjF - PrjB =%d"%(self.PrjFCnt10mS-self.PrjBCnt10mS));
         
-    def sDemoPrf(self,PrfClass):
+    def sDemoSetPrf(self,PrfClass):
         self.CfgPrfClass = PrfClass;
         self.sDemoSetCfg();
         
+    def sDemoPrfStr(self,prfnum,str):
+        if(self.CfgPrfClass >= prfnum):
+            print("Demo",prfnum,str);
+    
     def sPrjF_10mS_Demo(self):
         self.PrjFCnt10mS += 1;
         
     def sPrjB_10mS_Demo(self):
         self.PrjBCnt10mS += 1;
+        self.sDemoPrfStr(1,"PrjBCnt10mS: %2d"%(self.PrjBCnt10mS));
+        self.sDemoPrfStr(2,"PrjBCnt10mS:%#2X"%(self.PrjBCnt10mS));
 
     def sDemoCmd(self,incmd):
         # 空格进行切割
@@ -66,7 +72,7 @@ class cDemo(object):
             if(len(cmdlist) == 2):
                 if(cmdlist[1].isdigit() == False):#不是数字直接结束
                     return False;
-                self.sDemoPrf(int(cmdlist[1]));
+                self.sDemoSetPrf(int(cmdlist[1]));
                 print('DemoPrf <= {0}'.format(cmdlist[1]));
                 return True;
             return False;

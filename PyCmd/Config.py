@@ -29,7 +29,7 @@ class cConfig(object):
             print();
             
     def sConfigGet(self,Section,Option,DefaultVal):
-        StoreFloag = 1;
+        StoreFloag = 0;
         #如果不存 则添加组
         if(self.config.has_section(Section) == False):
             self.config.add_section(Section); # Add Section
