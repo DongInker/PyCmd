@@ -168,6 +168,9 @@ class cCom(object):
         ch1 = [];
         ch2 = [];
         ch3 = [];
+        ch4 = [];
+        ch5 = [];
+        ch6 = [];
         with open(self.BinFilePath,'rb') as f:
             f.seek(4,0);
             rbyte = f.read(2);
@@ -191,6 +194,20 @@ class cCom(object):
                 ch3 = struct.unpack(fmt,rbyte);
                 plot(ch3,'r');
 
+            if(chs >= 4):
+                rbyte = f.read(DataByteNum);
+                ch4 = struct.unpack(fmt,rbyte);
+                plot(ch4,'y');
+
+            if(chs >= 5):
+                rbyte = f.read(DataByteNum);
+                ch5 = struct.unpack(fmt,rbyte);
+                plot(ch5,'g');
+
+            if(chs >= 6):
+                rbyte = f.read(DataByteNum);
+                ch6 = struct.unpack(fmt,rbyte);
+                plot(ch6,'r');
             grid(True);#显示网格
             show();#关闭窗口继续运行
             #pause(3);#画布停留活动时间
@@ -295,6 +312,7 @@ class cCom(object):
             #print("  ComStopBit   .. -W Set Com StopBit  <1,2>");
             print("  StartCon     .. -W Start Com Con <open,close>");
             print("  BinFile      .. -W Rxd BinFile <chs> <St> <Et> [name]");
+            print("  PlotBin      .. -W Plot Last One Data Wave");
             return True;
 
         if(cmdlist[0] == 'commsg'):
