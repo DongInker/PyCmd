@@ -110,7 +110,12 @@ class cCom(object):
         if(self.isConnected == False):
             self.ComConnect();    
         if(self.isConnected == True):
-            self.ser.write(txd);
+            try:
+                self.ser.write(txd);
+            except Exception as e:
+                print("串口发送异常!");
+                self.isConnected = False;
+
         
     def ComConnect(self):
         self.isConnected = False;
@@ -119,7 +124,7 @@ class cCom(object):
             self.isConnected = True;
         except Exception as e:
             #print(e);
-            print("串口异常!");
+            print("串口打开异常!");
             #self.ser.close();
 
     def ComDisconnent(self):
