@@ -127,11 +127,6 @@ class cKeyCmd(object):
         # 有按键输入终止自动命令
         SetAutoTxdEn(0);
         
-        if(self.RxdBuf == 'xxx'): #关闭当前串口
-            from Com import ComDisCon;
-            ComDisCon();
-            self.RxdBuf = '';
-            return 0;
 
         if(KeyVal != '\r'):
             if(isUfdMode()== 1):#UFD模式 直接发送按键值
@@ -143,6 +138,10 @@ class cKeyCmd(object):
                 sys.stdout.write(' \b');# 删除显示最后一个字符
             else:
                 self.RxdBuf += KeyVal;
+                if(self.RxdBuf == 'xxx'): #快速关闭当前串口
+                    from Com import ComDisCon;
+                    ComDisCon();
+                    self.RxdBuf = '';
             sys.stdout.flush();#强制打印缓存数据    
             return 0;
 
